@@ -23,13 +23,13 @@ export default function RoomInfoComponent() {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                {/* {liveInfo?.stream_url?.flv_pull_url && (
+                {liveInfo?.stream_url?.flv_pull_url && (
                     <div className="lg:w-[500px]">  <Suspense fallback={<div>Loading...</div>}> <VideoPlayer src={liveInfo.stream_url.hls_pull_url} />  </Suspense></div>
-                )} */}
+                )}
                 <Separator />
-                <div className="flex items-start">
+                {liveInfo?.game_tag && <div className="flex items-start">
                     <GameTagRoomInfo tags={liveInfo?.game_tag} hashtag={liveInfo?.hashtag?.title?.toLowerCase()} />
-                </div>
+                </div>}
 
             </CardContent>
         </Card>
