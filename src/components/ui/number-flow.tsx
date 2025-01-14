@@ -33,7 +33,6 @@ export default function NumberFlowWrapper({
       suffix={suffix}
       spinTiming={spinTiming}
       willChange={willChange}
-      continuous={continuous}
     />
   );
 }
