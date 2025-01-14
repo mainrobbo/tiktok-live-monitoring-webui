@@ -13,7 +13,7 @@ export default function RoomInfoComponent() {
     const { liveInfo } = useContext(AppContext)
     if (!liveInfo?.hashtag?.title) return <></>
     return (
-        <Card>
+        <Card className="w-full">
             <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                     Live {liveInfo.hashtag?.title && <Button
@@ -24,7 +24,13 @@ export default function RoomInfoComponent() {
             </CardHeader>
             <CardContent>
                 {liveInfo?.stream_url?.flv_pull_url && (
-                    <div className="lg:w-[500px]">  <Suspense fallback={<div>Loading...</div>}> <VideoPlayer src={liveInfo.stream_url.hls_pull_url} />  </Suspense></div>
+                    <div className="flex w-full justify-center">
+                        <div className="lg:w-[240px]">
+                            <Suspense fallback={<div>Loading...</div>}>
+                                <VideoPlayer src={liveInfo.stream_url.hls_pull_url} />
+                            </Suspense>
+                        </div>
+                    </div>
                 )}
                 <Separator />
                 {liveInfo?.game_tag && <div className="flex items-start">
