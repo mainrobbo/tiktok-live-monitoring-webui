@@ -21,7 +21,6 @@ export default function CurrentStatistic() {
 function StatComponent({ type }: { type: ActivityType }) {
     const [count, setCount] = useState(0);
 
-    // Mapping activity type to the respective log key
     const data = useMemo(() => ({
         [ActivityType.COMMENT]: "chats",
         [ActivityType.GIFT]: "gifts",
@@ -29,27 +28,23 @@ function StatComponent({ type }: { type: ActivityType }) {
         [ActivityType.VIEW]: "views",
     }), []);
 
-    const ctx = useContext(AppContext); // Access logs data from the context
-    const logs = ctx[data[type]] || []; // Safely retrieve logs, default to empty array if none
+    const ctx = useContext(AppContext);
+    const logs = ctx[data[type]] || [];
 
-    const logsRef = useRef(logs); // Create ref to store logs data for debouncing
-
-    // Update logsRef whenever logs change
+    const logsRef = useRef(logs);
     useEffect(() => {
         logsRef.current = logs;
     }, [logs]);
 
-    // Memoizing the debounced count calculation to avoid re-creating it unnecessarily
     const debouncedSetCount = useMemo(() =>
         debounce(() => {
             const count = logsRef.current.filter((log: LogsData) => log.type === type).length;
             setCount(count);
-        }, 500), [type]);
+        }, 1000), [type]);
 
-    // Trigger debounced update whenever logs change
     useEffect(() => {
-        debouncedSetCount(); // Perform the debounced count calculation
-        return () => debouncedSetCount.cancel(); // Clean up on unmount or type change
+        debouncedSetCount();
+        return () => debouncedSetCount.cancel();
     }, [logs, debouncedSetCount]);
 
     return (

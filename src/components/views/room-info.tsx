@@ -11,7 +11,7 @@ import { Button } from "../ui/button";
 
 export default function RoomInfoComponent() {
     const { liveInfo } = useContext(AppContext)
-    if (!liveInfo) return <></>
+    if (!liveInfo?.hashtag?.title) return <></>
     return (
         <Card>
             <CardHeader>

@@ -18,38 +18,36 @@ import { Dispatch, SetStateAction, useCallback, useContext, useMemo } from "reac
 import { DataTable } from "../data-table"
 import Link from "next/link"
 
-type MostLikeUserData = {
+type UserData = {
     uniqueId: string
     id: string
     nickname: string
     profilePictureUrl: string
 }
-type MostLike = { user: MostLikeUserData, total: string, times: string }
-export default function MostLike({ open, setOpen }: { open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
-    const { likes: data }: { likes: LogsData[] } = useContext(AppContext)
+type OutputType = { user: UserData, times: string }
+export default function MostChat({ open, setOpen }: { open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
+    const { comments: data }: { comments: LogsData[] } = useContext(AppContext)
     const getMostLikes = useCallback(() => {
         const countOccurrences = data.reduce((acc, user) => {
-            const { uniqueId, likeCount } = user.data
+            const { uniqueId } = user.data
             if (!acc[uniqueId]) {
-                acc[uniqueId] = { user: user.data, times: 0, total: 0 }
+                acc[uniqueId] = { user: user.data, times: 0 }
             }
             acc[uniqueId].times++
-            acc[uniqueId].total += likeCount
             return acc
-        }, {} as { [key: string]: { user: MostLikeUserData, times: number, total: number } })
-        return Object.values(countOccurrences).map(({ user, times, total }) => ({
+        }, {} as { [key: string]: { user: UserData, times: number } })
+        return Object.values(countOccurrences).map(({ user, times, }) => ({
             user,
             times: times.toString(),
-            total: total.toString()
-        })).sort((a, b) => parseInt(b.total) - parseInt(a.total)).filter((_, i) => i <= 10)
+        })).sort((a, b) => parseInt(b.times) - parseInt(a.times)).filter((_, i) => i <= 10)
 
     }, [data]);
-    const columns: ColumnDef<MostLike>[] = useMemo(() => [
+    const columns: ColumnDef<OutputType>[] = useMemo(() => [
         {
             accessorKey: "user",
             header: () => <div className="text-left">Nickname</div>,
-            cell: ({ getValue }: CellContext<MostLike, unknown>) => {
-                const val = getValue() as MostLikeUserData
+            cell: ({ getValue }: CellContext<OutputType, unknown>) => {
+                const val = getValue() as UserData
                 return (
                     <Link href={`https://tiktok.com/@${val.uniqueId}`} target="_blank">{val.nickname}</Link>
                 )
@@ -58,16 +56,8 @@ export default function MostLike({ open, setOpen }: { open: boolean, setOpen: Di
         {
             accessorKey: "times",
             header: () => <div className="text-left">Count</div>,
-            cell: ({ getValue }: CellContext<MostLike, unknown>) => {
-                const val = getValue() as MostLikeUserData
-                return val
-            },
-        },
-        {
-            accessorKey: "total",
-            header: () => <div className="text-left">Total</div>,
-            cell: ({ getValue }: CellContext<MostLike, unknown>) => {
-                const val = getValue() as MostLikeUserData
+            cell: ({ getValue }: CellContext<OutputType, unknown>) => {
+                const val = getValue() as string
                 return val
             },
         }
@@ -83,7 +73,7 @@ export default function MostLike({ open, setOpen }: { open: boolean, setOpen: Di
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
-                    <DialogTitle>Top & Most Likes</DialogTitle>
+                    <DialogTitle>Most Chat</DialogTitle>
                     <DialogDescription>
                         {/* <Button onClick={getMostLikes}>Test</Button> */}
                     </DialogDescription>

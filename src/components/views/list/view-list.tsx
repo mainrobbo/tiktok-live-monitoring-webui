@@ -5,7 +5,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useContext, useEffect, useRef, useState } from "react";
 import { debounce } from "lodash";
 import { ActivityType, LogsData } from "@/lib/types/common";
-import moment from "moment";
 import { Separator } from "@/components/ui/separator";
 import BubblePerson from "../bubble-person";
 import BubbleTime from "../bubble-time";
@@ -14,6 +13,7 @@ export default function ViewList() {
     const [list, setList] = useState<LogsData[]>([])
     const { views: logs } = useContext(AppContext)
     const chatsRef = useRef<LogsData[]>(logs);
+
     useEffect(() => {
         chatsRef.current = logs;
     }, [logs]);
@@ -38,7 +38,7 @@ export default function ViewList() {
                 <ScrollArea className="h-[200px] rounded-md py-2 flex flex-col gap-2 w-full">
                     {
                         list.map(({ isRejoin, data }, index) => (
-                            <div key={index} className="lg:flex lg:items-start grid grid-cols-1 gap-2 justify-items-start py-0.5">
+                            <div key={index} className="flex items-start justify-items-start gap-2">
                                 <BubbleTime time={data.createTime} />
                                 <div className="flex flex-col items-start shrink">
                                     <BubblePerson logsData={{ type: ActivityType.VIEW, data }} />

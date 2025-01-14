@@ -12,7 +12,7 @@ import BubbleTime from "../bubble-time";
 
 export default function ChatList() {
     const [list, setList] = useState<LogsData[]>([])
-    const { chats: logs } = useContext(AppContext)
+    const { comments: logs } = useContext(AppContext)
     const chatsRef = useRef<LogsData[]>(logs);
     useEffect(() => {
         chatsRef.current = logs;

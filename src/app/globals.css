@@ -86,3 +86,7 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* .abc > ul{
+  @apply grid grid-cols-4 gap-2 w-full justify-items-stretch h-full p-2;
+} */

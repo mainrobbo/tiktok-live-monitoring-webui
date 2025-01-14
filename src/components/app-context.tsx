@@ -69,7 +69,7 @@ export default function AppContextProvider({
       socket.on("data-islive", (data) => {
         try {
           data = JSON.parse(data);
-          if (data.message.toString().toLowerCase().includes("has ended")) {
+          if (data.message.toString().toLowerCase().includes("ended")) {
             toast.warning('Live is ended')
           } else {
             console.log({ data }, "data-islive")
@@ -87,7 +87,7 @@ export default function AppContextProvider({
         try {
           data = JSON.parse(data);
           //TODO setChats((prev) => [data, ...prev]);
-          setLogs((prev: LogsData[]) => [{ type: ActivityType.COMMENT, data } as LogsData, ...prev]);
+          addLogs({ data, type: ActivityType.COMMENT })
           //TODO if (isNotifySound && showComment) SoundNotify({ type: "comment" });
           /**
            * TODO 
@@ -106,10 +106,8 @@ export default function AppContextProvider({
       socket.on("data-gift", (data) => {
         try {
           data = JSON.parse(data);
-          setLogs((prev: LogsData[]) => [
-            { type: ActivityType.GIFT, isStreak: data.giftType === 1 && !data.repeatEnd, data },
-            ...prev,
-          ]);
+          addLogs({ isStreak: data.giftType === 1, data, type: ActivityType.GIFT })
+
         } catch (err) {
           console.error('data-gift', err)
         }
@@ -117,10 +115,7 @@ export default function AppContextProvider({
       socket.on("data-like", (data) => {
         try {
           data = JSON.parse(data);
-          setLogs((prev: LogsData[]) => [
-            { type: ActivityType.LIKE, data },
-            ...prev,
-          ]);
+          addLogs({ data, type: ActivityType.LIKE })
         } catch (err) {
           console.error('data-like', err)
         }
@@ -128,12 +123,9 @@ export default function AppContextProvider({
       socket.on("data-member", (data) => {
         try {
           data = JSON.parse(data);
-          if (isRejoin(data.userId)) {
-            setLogs((prev: LogsData[]) => [{ type: ActivityType.VIEW, data, isRejoin: true, } as LogsData, ...prev]);
-          } else {
-            // if (isNotifySound && showViewer) SoundNotify({ type: "viewer" });
-            setLogs((prev: LogsData[]) => [{ type: ActivityType.VIEW, data, isRejoin: false, } as LogsData, ...prev]);
-          }
+          addLogs({ isRejoin: isRejoin(data.userId), data, type: ActivityType.VIEW })
+          // if (isNotifySound && showViewer) SoundNotify({ type: "viewer" });
+
         } catch (err) { }
       });
       socket.on("data-debug", (data) => {
@@ -158,9 +150,18 @@ export default function AppContextProvider({
 
   // Additional function
   const isRejoin = useCallback(
-    (userId: string) => logs.filter(log => log.type === ActivityType.VIEW).find(log => log.data.userId === userId),
-    [logs]
-  );
+    (userId: string): boolean => {
+      return logs.some(log => log.type === ActivityType.VIEW && log.data.userId === userId);
+    }, [logs]);
+
+  const addLogs = (newLogs: LogsData) => {
+    try {
+      const { data, type } = newLogs
+      if (data && data.userId && data.followInfo && data.userDetails) setLogs((prev: LogsData[]) => [{ type, data }, ...prev]);
+    } catch (err) {
+      console.error('addLogs', newLogs, err)
+    }
+  }
   // Button handler
   const handleConnectButtonClick = (reset?: boolean) => {
     set("username", username)
@@ -180,6 +181,9 @@ export default function AppContextProvider({
     if (typeof socket !== "undefined") {
       socket.disconnect()
     }
+  }
+  const handleCleanLogsClick = () => {
+    setLogs([])
   }
   const downloadToJson = () => {
     const fileName = `live_${username}_${moment().format("DD_MM_YY_hh_mm")}`;
@@ -203,10 +207,10 @@ export default function AppContextProvider({
     <AppContext.Provider value={{
       wsUrl, setWsUrl,
       username, setUsername,
-      chats: logs.filter(log => log.type == ActivityType.COMMENT),
-      views: logs.filter(log => log.type == ActivityType.VIEW),
-      gifts: logs.filter(log => log.type == ActivityType.GIFT),
-      likes: logs.filter(log => log.type == ActivityType.LIKE),
+      comments: logs.filter(log => log.type == ActivityType.COMMENT).filter((_, i) => i <= 50),
+      views: logs.filter(log => log.type == ActivityType.VIEW).filter((_, i) => i <= 50),
+      gifts: logs.filter(log => log.type == ActivityType.GIFT).filter((_, i) => i <= 50),
+      likes: logs.filter(log => log.type == ActivityType.LIKE).filter((_, i) => i <= 50),
       logs,
       liveInfo,
       isLive,
@@ -215,7 +219,8 @@ export default function AppContextProvider({
       handlePreferencesSwitch,
       handleConnectButtonClick,
       handleDisconnectButtonClick,
-      downloadToJson
+      handleCleanLogsClick,
+      downloadToJson,
     }}>
       {children}
     </AppContext.Provider>

@@ -14,7 +14,7 @@ import {
 import { Separator } from "./ui/separator"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
-import { BellRingIcon, ChartBarBigIcon, ChevronDown, } from "lucide-react"
+import { BellRingIcon, ChartBarBigIcon, ChevronDown, TrashIcon, } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
 import { useContext } from "react"
 import { AppContext } from "./app-context"
@@ -23,6 +23,7 @@ import { AppSettingPopover } from "./app-settings"
 import CurrentStatistic from "./views/current-stats"
 import ConnectButton from "./button/connect-button"
 import PreferencesButton from "./button/preferences-button"
+import CleanButton from "./button/clean-button"
 
 export function AppSidebar() {
     const {
@@ -54,13 +55,14 @@ export function AppSidebar() {
                             onClick={handleDisconnectButtonClick}
                             variant={"destructive"}
                             size={"sm"}>
-                            Disconnect
+                            Stop
                         </Button>
+                        <CleanButton />
                         <AppSettingPopover />
                     </div>
                     <PreferencesButton />
                 </SidebarGroup>
-                <Collapsible className="group/collapsible">
+                <Collapsible defaultOpen={true} className="group/collapsible">
                     <SidebarGroup>
                         <SidebarGroupLabel asChild>
                             <CollapsibleTrigger>

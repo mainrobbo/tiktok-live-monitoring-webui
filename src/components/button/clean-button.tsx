@@ -13,38 +13,34 @@ import {
 import { Button } from "@/components/ui/button"
 import { useContext, useState } from "react";
 import { AppContext } from "../app-context";
-export default function ConnectButton() {
+import { Trash2 } from "lucide-react";
+export default function CleanButton() {
     const [open, setOpen] = useState(false)
     const {
-        handleConnectButtonClick,
-        username,
+        handleCleanLogsClick,
         isConnectedToServer,
         logs
     } = useContext(AppContext);
-    const connectButton = () => {
-        if (logs.length > 0) {
-            setOpen(true)
-        } else {
-            handleConnectButtonClick()
-        }
-    }
-    return (
-        <>
-            <Button size={"sm"} className="w-full bg-emerald-500"
-                disabled={!username || isConnectedToServer}
-                onClick={connectButton}
-            >Start</Button>
-            <AlertDialog open={open} onOpenChange={setOpen}>
 
+    return (
+
+        <>
+
+            <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogTrigger asChild>
+                    <Button size={"sm"} variant={"outline"}
+                        disabled={logs.length == 0}
+                    ><Trash2 /></Button>
+                </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the data from last user. Make sure you export it first.
+                            This action cannot be undone. This will permanently clear the logs data from last user. Make sure you export it first.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction onClick={handleConnectButtonClick}>Continue</AlertDialogAction>
+                        <AlertDialogAction onClick={handleCleanLogsClick}>Continue</AlertDialogAction>
                         <AlertDialogCancel>Cancel
                         </AlertDialogCancel>
                     </AlertDialogFooter>

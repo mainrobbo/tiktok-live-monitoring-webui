@@ -8,7 +8,6 @@ import { ActivityType, LogsData } from "@/lib/types/common";
 import moment from "moment";
 import { Separator } from "@/components/ui/separator";
 import BubblePerson from "../bubble-person";
-import { MenuLike } from "../menu/menu-like";
 import BubbleTime from "../bubble-time";
 
 export default function LikeList() {
@@ -31,17 +30,12 @@ export default function LikeList() {
         <Card className="text-sm">
             <CardHeader>
 
-                <div className="items-center flex justify-between">
-                    <div className="flex flex-col">
-                        <CardTitle>
-                            Like
-                        </CardTitle>
-                        <CardDescription>
-                            Latest likes
-                        </CardDescription>
-                    </div>
-                    <MenuLike />
-                </div>
+
+                <CardTitle>
+                    Like
+                </CardTitle>
+
+
 
             </CardHeader>
 
@@ -50,7 +44,7 @@ export default function LikeList() {
                 <ScrollArea className="h-[200px] rounded-md py-2 flex flex-col gap-2 w-full">
                     {
                         list.map(({ data }, index) => (
-                            <div key={index} className="lg:flex lg:items-start grid grid-cols-1 gap-2 justify-items-start py-0.5">
+                            <div key={index} className="flex items-start justify-items-start gap-2">
                                 <BubbleTime time={data.createTime} />
                                 <div className="flex flex-col items-start shrink">
                                     <BubblePerson logsData={{ type: ActivityType.LIKE, data }} />

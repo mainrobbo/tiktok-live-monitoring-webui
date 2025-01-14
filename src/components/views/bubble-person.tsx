@@ -1,22 +1,15 @@
 import { ActivityType, LogsData } from "@/lib/types/common";
-import Link from "next/link";
+
 import {
     Avatar,
     AvatarFallback,
     AvatarImage,
 } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import {
-    HoverCard,
-    HoverCardContent,
-    HoverCardTrigger,
-} from "@/components/ui/hover-card"
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { CalendarIcon } from "lucide-react";
 import { useContext } from "react";
 import { AppContext } from "../app-context";
 const gifterLevelColors = (level: number) => {
@@ -63,14 +56,14 @@ export default function BubblePerson({ logsData, icon = false }: { logsData: Log
                             <h4 className="text-base font-semibold">{data.nickname}</h4>
                             <h4 className="text-sm">@{data.uniqueId}</h4>
                             <p className="text-sm">
-                                {userDetails.bioDescription}
+                                {userDetails?.bioDescription ?? ""}
                             </p>
                             <div className="flex items-center pt-2 justify-between gap-2">
                                 <span className="text-xs text-muted-foreground">
-                                    <b>{followInfo.followingCount}</b> Following
+                                    <b>{followInfo.followingCount ?? "0"}</b> Following
                                 </span>
                                 <span className="text-xs text-muted-foreground">
-                                    <b>{followInfo.followerCount}</b> Followers
+                                    <b>{followInfo.followerCount ?? "0"}</b> Followers
                                 </span>
                             </div>
                         </div>

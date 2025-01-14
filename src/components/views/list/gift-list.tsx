@@ -38,7 +38,7 @@ export default function GiftList() {
                 <ScrollArea className="h-[200px] rounded-md p-4 flex flex-col gap-2 w-full">
                     {
                         list.map(({ data, isStreak }, index) => (
-                            <div key={index} className="flex items-start gap-2">
+                            <div key={index} className="flex items-start justify-items-start gap-2">
                                 <BubbleTime time={data.createTime} />
                                 <div className="flex flex-col items-start shrink">
                                     <BubblePerson logsData={{ type: ActivityType.GIFT, data }} />
