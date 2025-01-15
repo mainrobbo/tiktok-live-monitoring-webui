@@ -32,6 +32,8 @@ export default function BubblePerson({ logsData, icon = false }: { logsData: Log
         [ActivityType.GIFT]: "🎁",
         [ActivityType.LIKE]: "💗",
         [ActivityType.VIEW]: "➡️",
+        [ActivityType.SHARE]: "🔗",
+        [ActivityType.SOCIAL]: "👤",
     };
     const { userDetails, followInfo } = data
     const { preferences } = useContext(AppContext)

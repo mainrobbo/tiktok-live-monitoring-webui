@@ -5,7 +5,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useContext, useEffect, useRef, useState } from "react";
 import { debounce } from "lodash";
 import { ActivityType, LogsData } from "@/lib/types/common";
-import moment from "moment";
 import { Separator } from "@/components/ui/separator";
 import BubblePerson from "../bubble-person";
 import BubbleTime from "../bubble-time";
@@ -13,9 +12,11 @@ import BubbleTime from "../bubble-time";
 export default function ChatList() {
     const [list, setList] = useState<LogsData[]>([])
     const { comments: logs } = useContext(AppContext)
+    console.log({ logs })
     const chatsRef = useRef<LogsData[]>(logs);
     useEffect(() => {
         chatsRef.current = logs;
+        setList(logs)
     }, [logs]);
     const debouncedUpdateList = useRef(
         debounce(() => {
@@ -39,9 +40,9 @@ export default function ChatList() {
                     {
                         list.map(({ data }, index) => (
                             <div key={index} className="flex items-start justify-items-start gap-2">
-                                <BubbleTime time={data.createTime} />
+                                {/* <BubbleTime time={data.createTime} /> */}
                                 <div className="flex flex-col">
-                                    <BubblePerson logsData={{ type: ActivityType.COMMENT, data }} />
+                                    {/* <BubblePerson logsData={{ type: ActivityType.COMMENT, data }} /> */}
                                     <div className="text-left">{data.comment}</div>
                                 </div>
 

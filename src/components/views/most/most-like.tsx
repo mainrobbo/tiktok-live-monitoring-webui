@@ -5,18 +5,16 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { LogsData } from "@/lib/types/common"
 import { CellContext, ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { Dispatch, SetStateAction, useCallback, useContext, useMemo } from "react"
 import { DataTable } from "../data-table"
 import Link from "next/link"
+import ShowListLike from "./show-list-like"
+import { ArrowRightCircle } from "lucide-react"
 
 type MostLikeUserData = {
     uniqueId: string
@@ -41,7 +39,7 @@ export default function MostLike({ open, setOpen }: { open: boolean, setOpen: Di
             user,
             times: times.toString(),
             total: total.toString()
-        })).sort((a, b) => parseInt(b.total) - parseInt(a.total)).filter((_, i) => i <= 10)
+        })).sort((a, b) => parseInt(b.total) - parseInt(a.total)).filter((_, i) => i < 10)
 
     }, [data]);
     const columns: ColumnDef<MostLike>[] = useMemo(() => [
@@ -51,7 +49,7 @@ export default function MostLike({ open, setOpen }: { open: boolean, setOpen: Di
             cell: ({ getValue }: CellContext<MostLike, unknown>) => {
                 const val = getValue() as MostLikeUserData
                 return (
-                    <Link href={`https://tiktok.com/@${val.uniqueId}`} target="_blank">{val.nickname}</Link>
+                    <Link href={`https://tiktok.com/@${val.uniqueId}`} className="underline hover:opacity-80" title={`@${val.uniqueId}`} target="_blank">{val.nickname}</Link>
                 )
             },
         },
@@ -70,6 +68,17 @@ export default function MostLike({ open, setOpen }: { open: boolean, setOpen: Di
                 const val = getValue() as MostLikeUserData
                 return val
             },
+        },
+        {
+            accessorKey: "action",
+            header: () => <div className="text-left">Action</div>,
+            cell: ({ row }: CellContext<MostLike, unknown>) => {
+                return (
+                    <ShowListLike
+                        TriggerElement={<Button size={"icon"} variant={"outline"}><ArrowRightCircle className="text-muted-foreground" size={16} /></Button>}
+                        username={row.original.user.uniqueId} />
+                )
+            },
         }
     ], []);
     const mostLikeArray = useMemo(() => getMostLikes(), [getMostLikes]);
@@ -85,7 +94,7 @@ export default function MostLike({ open, setOpen }: { open: boolean, setOpen: Di
                 <DialogHeader>
                     <DialogTitle>Top & Most Likes</DialogTitle>
                     <DialogDescription>
-                        {/* <Button onClick={getMostLikes}>Test</Button> */}
+                        Showing top 10 most users with total giving like and frequent.
                     </DialogDescription>
                 </DialogHeader>
                 <DataTable table={table} />

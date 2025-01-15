@@ -3,6 +3,8 @@ export enum ActivityType {
   LIKE = "like",
   GIFT = "gift",
   VIEW = "view",
+  SHARE = "share",
+  SOCIAL = "social",
 }
 
 export type LogsData = {

@@ -11,42 +11,40 @@ import { LogsData } from "@/lib/types/common"
 import { CellContext, ColumnDef, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { Dispatch, SetStateAction, useCallback, useContext, useMemo } from "react"
 import { DataTable } from "../data-table"
-import Link from "next/link"
 import ShowListChat from "./show-list-chat"
 
-type UserData = {
-    uniqueId: string
-    id: string
-    nickname: string
-    profilePictureUrl: string
-}
-type OutputType = { user: UserData, times: string }
-export default function MostChat({ open, setOpen }: { open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
+type OutputType = { word: string, users: string[], times: string }
+
+export default function MostWord({ open, setOpen }: { open: boolean, setOpen: Dispatch<SetStateAction<boolean>> }) {
     const { comments: data }: { comments: LogsData[] } = useContext(AppContext)
-    const getMostLikes = useCallback(() => {
+    const getMostWords = useCallback(() => {
         const countOccurrences = data.reduce((acc, user) => {
-            const { uniqueId } = user.data
-            if (!acc[uniqueId]) {
-                acc[uniqueId] = { user: user.data, times: 0 }
-            }
-            acc[uniqueId].times++
+            const { comment, userId } = user.data
+            comment.split(" ").forEach((word: string) => {
+                const lowerCaseWord = word.toLowerCase();
+                if (acc[lowerCaseWord]) {
+                    acc[lowerCaseWord].times += 1;
+                    if (!acc[lowerCaseWord].users.includes(userId)) acc[lowerCaseWord].users.push(userId)
+                } else {
+                    acc[lowerCaseWord] = { word: lowerCaseWord, times: 1, users: [userId] };
+                }
+            });
             return acc
-        }, {} as { [key: string]: { user: UserData, times: number } })
-        return Object.values(countOccurrences).map(({ user, times, }) => ({
-            user,
+        }, {} as { [key: string]: { word: string, users: string[], times: number } })
+        return Object.values(countOccurrences).map(({ word, times, users }) => ({
+            word,
+            users,
             times: times.toString(),
         })).sort((a, b) => parseInt(b.times) - parseInt(a.times)).filter((_, i) => i < 10)
 
     }, [data]);
     const columns: ColumnDef<OutputType>[] = useMemo(() => [
         {
-            accessorKey: "user",
-            header: () => <div className="text-left">Name</div>,
+            accessorKey: "word",
+            header: () => <div className="text-left">Word</div>,
             cell: ({ getValue }: CellContext<OutputType, unknown>) => {
-                const val = getValue() as UserData
-                return (
-                    <Link href={`https://tiktok.com/@${val.uniqueId}`} className="underline hover:opacity-80" title={`@${val.uniqueId}`} target="_blank">{val.nickname}</Link>
-                )
+                const val = getValue() as string
+                return val
             },
         },
         {
@@ -58,17 +56,24 @@ export default function MostChat({ open, setOpen }: { open: boolean, setOpen: Di
             },
         },
         {
-            accessorKey: "chat-detail",
+            accessorKey: "users",
+            header: () => <div className="text-left">Total User</div>,
+            cell: ({ getValue }: CellContext<OutputType, unknown>) => {
+                const val = getValue() as string[]
+                return val.length
+            },
+        },
+        {
+            accessorKey: "view",
             header: () => <div className="text-left">View Detail</div>,
             cell: ({ row }: CellContext<OutputType, unknown>) => {
-                return <ShowListChat username={row.original.user.uniqueId} />
-            }
-        }
+                return <ShowListChat word={row.original.word} />
+            },
+        },
     ], []);
-    const mostLikeArray = useMemo(() => getMostLikes(), [getMostLikes]);
-
+    const mostWordsArray = useMemo(() => getMostWords(), [data]);
     const table = useReactTable({
-        data: mostLikeArray,
+        data: mostWordsArray,
         columns,
         getCoreRowModel: getCoreRowModel(),
     });
@@ -76,9 +81,9 @@ export default function MostChat({ open, setOpen }: { open: boolean, setOpen: Di
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
-                    <DialogTitle>Most Chat</DialogTitle>
+                    <DialogTitle>Most Word</DialogTitle>
                     <DialogDescription>
-                        Showing top 10 most users actively on chat.
+                        Showing top 10 most word from chat.
                     </DialogDescription>
                 </DialogHeader>
                 <DataTable table={table} />
