@@ -1,7 +1,7 @@
 import { Middleware } from '@reduxjs/toolkit'
 import { ActivityType, SocketActionType } from '@/lib/types/common'
 import io, { Socket } from 'socket.io-client'
-import { setConnected, setLive } from '@/store/connectionSlice'
+import { setState, setConnected, setLive } from '@/store/connectionSlice'
 import { toast } from 'sonner'
 import { CommentLog } from '@/lib/types/log'
 import { setLiveIntro, setMicBattle, setRoomInfo } from '@/store/liveInfoSlice'
@@ -10,6 +10,7 @@ import { beforeAddLog, createBatcher } from '@/lib/helper/data-handle'
 import { cleanLogs } from '@/store/logsSlice'
 
 let socket: Socket | null = null
+let previousUsername = ''
 const websocketMiddleware: Middleware<{}, any> = store => {
   const batcher = createBatcher(store.dispatch)
   const viewUserIds = new Set<string>()
@@ -25,11 +26,13 @@ const websocketMiddleware: Middleware<{}, any> = store => {
 
     switch (action.type) {
       case SocketActionType.START:
-        if (socket === null || !socket.connected) {
-          /** Clean before start */
+        dispatch(setState('connecting'))
+        /** Clean before start */
+        if (previousUsername != username) {
           dispatch(cleanLogs())
           viewUserIds.clear()
-
+        }
+        if (socket === null || !socket.connected) {
           if (!socket?.io.opts.hostname?.includes(wsUrl)) {
             socket?.close()
             socket = null
@@ -40,40 +43,65 @@ const websocketMiddleware: Middleware<{}, any> = store => {
             reconnection: true,
             autoConnect: true,
           })
-          localStorage.setItem('ZERATIKTOK:wsUrl', wsUrl)
         }
         socket.emit('listenToUsername', JSON.stringify({ username }))
+        previousUsername = username
         socket.on('connect', () => {
           dispatch(setConnected(true))
-          toast.success('Connected to server')
+          toast.success('Connected to server', {
+            position: 'bottom-right',
+          })
           localStorage.setItem('ZERATIKTOK:username', username)
+          // Only save if connection made successfully
+          localStorage.setItem('ZERATIKTOK:wsUrl', wsUrl)
         })
         socket.on('disconnect', () => {
+          // Only if disconnected from server.
+          toast.warning('Disconnected from server', {
+            position: 'bottom-right',
+            action: {
+              label: 'Reconnect',
+              onClick: () => socket?.connect(),
+            },
+          })
+          // Cleanup state
           dispatch(setConnected(false))
           dispatch(setLive(false))
+          dispatch(setState('idle'))
         })
 
         //* Connection
         socket.on('data-connection', data => {
           try {
             data = JSON.parse(data)
+            if (data?.message) {
+              toast.warning(data.message)
+            }
             dispatch(setLive(data.isConnected))
+
+            // Handle if connection backend-to-tiktok
+            if (data.isConnected) {
+              dispatch(setState('connected'))
+              toast.success('Connected to tiktok')
+            } else {
+              dispatch(setState('idle'))
+              toast.warning('Disconnected from tiktok', {
+                action: {
+                  label: 'Reconnect',
+                  onClick: () => {
+                    dispatch(setState('connecting'))
+                    socket?.emit(
+                      'listenToUsername',
+                      JSON.stringify({ username }),
+                    )
+                  },
+                },
+              })
+            }
           } catch (err) {
             console.log('data-connection', err)
           }
         })
-        socket.on('data-islive', data => {
-          try {
-            data = JSON.parse(data)
-            if (data?.message) {
-              toast.warning(data.message)
-            }
-          } catch (err) {
-          } finally {
-            dispatch(setLive(false))
-          }
-        })
-
         //* Room info
         socket.on('data-roomInfo', data => {
           try {
@@ -207,9 +235,16 @@ const websocketMiddleware: Middleware<{}, any> = store => {
         break
       case SocketActionType.STOP:
         if (socket && socket.connected) {
-          socket.disconnect()
-          console.log('Socket connection closed')
+          socket.emit('stopListen')
+          console.log(
+            'Asking top stop listening',
+            'Socket connection:',
+            socket.connected,
+          )
         }
+        dispatch(setState('idle'))
+        dispatch(setLive(false))
+        batcher.forceProcess()
         break
       case SocketActionType.RECONNECT:
         if (socket) socket.connect()
