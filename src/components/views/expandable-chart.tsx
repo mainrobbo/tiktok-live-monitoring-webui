@@ -47,7 +47,7 @@ import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import NumberFlow from '@number-flow/react'
 import { useSelector } from 'react-redux'
 import { getAllLogs } from '../selector/logs'
-import { LogData } from '@/lib/types/log'
+import { LogEntry } from '@/store/logsSlice'
 
 type ChartData = {
   [key: string]: {
@@ -103,15 +103,13 @@ export default function ExpandableChart() {
     'gift',
   ])
   const logs = useSelector(getAllLogs)
-  const [processedLogs, setProcessedLogs] = useState<LogData[]>([])
-  const logEntriesRef = useRef<LogData[]>([])
+  const [processedLogs, setProcessedLogs] = useState<LogEntry[]>([])
+  const logEntriesRef = useRef<LogEntry[]>([])
   const lastProcessedIndexRef = useRef(0) // Track last processed index
-
   const processingRef = useRef(false)
-
   const debounceLogs = useCallback(
     debounce(
-      (newLogs: LogData[]) => {
+      (newLogs: LogEntry[]) => {
         setProcessedLogs(newLogs)
         processingRef.current = false
         lastProcessedIndexRef.current = logEntriesRef.current.length
@@ -121,8 +119,9 @@ export default function ExpandableChart() {
     ),
     [],
   )
+
   const processLogsInBatch = useCallback(
-    (newLogs: LogData[]) => {
+    (newLogs: LogEntry[]) => {
       if (!processingRef.current) {
         processingRef.current = true
         const uniqueLogs = logEntriesRef.current.slice(
@@ -140,6 +139,12 @@ export default function ExpandableChart() {
   useEffect(() => {
     if (logs?.length) {
       processLogsInBatch(logs)
+    } else {
+      logEntriesRef.current = []
+      lastProcessedIndexRef.current = 0
+      debounceLogs.cancel() // Cancel any ongoing debounced process
+      setProcessedLogs([]) // Clear the UI logs
+      processingRef.current = false // Reset processing state
     }
   }, [logs, processLogsInBatch])
   useEffect(() => {
@@ -151,11 +156,10 @@ export default function ExpandableChart() {
   }, [])
   const transformedData = useCallback(() => {
     const countOccurrences = processedLogs.reduce(
-      (res: any, log: any) => {
-        const { createTime: time, likeCount, log_type: type } = log
-        const createTime = moment(
-          moment.unix(Math.round(parseInt(time) / 1000)),
-        ).format('hh:mm')
+      (res: any, log: LogEntry) => {
+        const { data, timestamp } = log
+        const { likeCount, log_type: type } = data
+        const createTime = moment(moment.unix(timestamp)).format('hh:mm')
         if (!res[createTime as keyof ChartData]) {
           res[createTime] = {
             createTime,
@@ -227,12 +231,12 @@ export default function ExpandableChart() {
   const lastDate = useCallback(() => {
     if (processedLogs.length === 0) return ''
     const last = processedLogs
-      .map((log: LogData) => {
-        const { createTime } = log
-        return parseInt(createTime)
+      .map((log: LogEntry) => {
+        const { timestamp } = log
+        return timestamp
       })
       .sort((a: number, b: number) => a - b)
-    return moment(moment.unix(parseInt(last[0].toString()) / 1000)).fromNow()
+    return moment(moment.unix(last[0])).fromNow()
   }, [processedLogs])
 
   // Final Data
