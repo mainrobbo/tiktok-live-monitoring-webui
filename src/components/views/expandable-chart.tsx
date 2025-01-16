@@ -8,7 +8,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, m } from 'framer-motion'
 import {
   Clock,
   GitBranch,
@@ -103,18 +103,62 @@ export default function ExpandableChart() {
     'gift',
   ])
   const logs = useSelector(getAllLogs)
-  const [debouncedLogs, setDebouncedLogs] = useState(logs)
-  const debouncedSetLogsRef = useRef(
-    debounce(l => {
-      setDebouncedLogs(l)
-    }, 1000),
-  )
+  const [processedLogs, setProcessedLogs] = useState<LogData[]>([])
+  const logEntriesRef = useRef<LogData[]>([])
+  const lastProcessedIndexRef = useRef(0) // Track last processed index
 
+  const processingRef = useRef(false)
+
+  const debounceLogs = useCallback(
+    debounce(
+      (newLogs: LogData[]) => {
+        console.log('Processing batch:', newLogs.length)
+        console.log(
+          'logs:',
+          logEntriesRef.current.length,
+          'processed:',
+          processedLogs.length,
+        )
+        setProcessedLogs(newLogs)
+        processingRef.current = false
+        lastProcessedIndexRef.current = logEntriesRef.current.length
+      },
+      3000,
+      { maxWait: 5000 },
+    ),
+    [],
+  )
+  const processLogsInBatch = useCallback(
+    (newLogs: LogData[]) => {
+      if (!processingRef.current) {
+        processingRef.current = true
+        const uniqueLogs = logEntriesRef.current.slice(
+          lastProcessedIndexRef.current,
+        )
+        const combinedLogs = [...uniqueLogs, ...newLogs]
+        logEntriesRef.current = combinedLogs
+        debounceLogs(combinedLogs)
+      } else {
+        logEntriesRef.current = [...logEntriesRef.current, ...newLogs]
+      }
+    },
+    [debounceLogs],
+  )
   useEffect(() => {
-    debouncedSetLogsRef.current(logs)
-  }, [logs])
+    if (logs?.length) {
+      console.log('New logs received:', logs.length)
+      processLogsInBatch(logs)
+    }
+  }, [logs, processLogsInBatch])
+  useEffect(() => {
+    return () => {
+      logEntriesRef.current = []
+      lastProcessedIndexRef.current = 0
+      processingRef.current = false
+    }
+  }, [])
   const transformedData = useCallback(() => {
-    const countOccurrences = debouncedLogs.reduce(
+    const countOccurrences = processedLogs.reduce(
       (res: any, log: any) => {
         const { createTime: time, likeCount, log_type: type } = log
         const createTime = moment(
@@ -187,52 +231,58 @@ export default function ExpandableChart() {
         mic_armies,
       }),
     )
-  }, [debouncedLogs])
+  }, [processedLogs])
   const lastDate = useCallback(() => {
-    const last = debouncedLogs
+    const last = processedLogs
       .map((log: LogData) => {
         const { createTime } = log
         return parseInt(createTime)
       })
       .sort((a: number, b: number) => a - b)
     return moment(moment.unix(parseInt(last[0].toString()) / 1000)).fromNow()
-  }, [debouncedLogs])
+  }, [processedLogs])
 
-  // TODO Bug - Reproduce: Start - Stop.
+  // Final Data
   const transformedDataArray = useMemo(
     () => transformedData(),
     [transformedData],
   )
-  const total = useMemo(
-    () => ({
-      like: transformedDataArray.reduce(
-        (acc, curr) => acc + (curr.like as number),
-        0,
-      ),
-      view: transformedDataArray.reduce(
-        (acc, curr) => acc + (curr.view as number),
-        0,
-      ),
-      comment: transformedDataArray.reduce(
-        (acc, curr) => acc + (curr.comment as number),
-        0,
-      ),
-      gift: transformedDataArray.reduce(
-        (acc, curr) => acc + (curr.gift as number),
-        0,
-      ),
-      share: transformedDataArray.reduce(
-        (acc, curr) => acc + (curr.share as number),
-        0,
-      ),
-      social: transformedDataArray.reduce(
-        (acc, curr) => acc + (curr.social as number),
-        0,
-      ),
-    }),
-    [transformedDataArray],
-  )
-
+  type t = {
+    createTime: string
+    gift: number
+    view: number
+    like: number
+    comment: number
+    social: number
+    share: number
+    subscribe: number
+    mic_armies: number
+  }
+  const countTotal = (key: keyof t) => {
+    let count = transformedDataArray.reduce(
+      (acc, curr) => acc + (curr[key] as number),
+      0,
+    )
+    let pembilangan = ''
+    if (count >= 1_000_000) {
+      pembilangan = 'M'
+      count = count / 1_000_000
+    } else if (count >= 10_000) {
+      pembilangan = 'K'
+      count = count / 1_000
+    }
+    return { count, pembilangan }
+  }
+  const total = useMemo(() => {
+    return {
+      like: countTotal('like'),
+      view: countTotal('view'),
+      comment: countTotal('comment'),
+      gift: countTotal('gift'),
+      share: countTotal('share'),
+      social: countTotal('social'),
+    }
+  }, [transformedDataArray])
   useEffect(() => {
     const updateWidth = () => {
       if (contentRef.current) {
@@ -515,12 +565,13 @@ export default function ExpandableChart() {
                     </span>
                     <span className='text-lg font-bold leading-none sm:text-3xl'>
                       <NumberFlow
-                        value={total[key as keyof typeof total]}
+                        value={total[key as keyof typeof total].count}
                         transformTiming={{
                           duration: 500,
                           easing: 'ease-out',
                         }}
                       />
+                      {total[key as keyof typeof total].pembilangan}
                     </span>
                   </button>
                 )
@@ -528,7 +579,7 @@ export default function ExpandableChart() {
             )}
           </div>
           <span className='px-3 py-3  text-sm text-muted-foreground'>
-            Latest activity at {debouncedLogs.length > 0 && lastDate()}
+            Latest activity at {processedLogs.length > 0 && lastDate()}
           </span>
         </div>
       </CardFooter>
