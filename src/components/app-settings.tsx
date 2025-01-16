@@ -9,11 +9,42 @@ import {
 } from "@/components/ui/popover"
 import { CogIcon } from "lucide-react"
 import { Separator } from "./ui/separator"
-import { useContext } from "react"
-import { AppContext } from "./app-context"
+import { useDispatch, useSelector } from "react-redux"
+import { RootState } from "@/store"
+import { useEffect } from "react"
+import useLocalStorage from "@/hooks/use-localstorage"
+import { setWSUrl, setProxyUrl, setProxyTimeout } from "@/store/connectionSlice"
 
 export function AppSettingPopover() {
-    const { wsUrl, setWsUrl, isConnectedToServer } = useContext(AppContext)
+    const dispatch = useDispatch();
+    const { wsUrl, proxyUrl, proxyTimeout } = useSelector(({ connection }: { connection: RootState["connection"] }) => connection);
+
+    const { get } = useLocalStorage()
+
+    useEffect(() => {
+        const savedWsUrl = get('wsUrl')
+        if (savedWsUrl) {
+            dispatch(setWSUrl(savedWsUrl));
+        }
+        const savedProxyUrl = get('proxyUrl')
+        if (savedProxyUrl) {
+            dispatch(setProxyUrl(savedProxyUrl));
+        }
+        const savedProxyTimeout = get('proxyTimeout')
+        if (savedProxyTimeout) {
+            dispatch(setProxyTimeout(parseInt(savedProxyTimeout)));
+        }
+    }, []);
+
+    const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(setWSUrl(e.target.value));
+    };
+    const handleProxyUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(setProxyUrl(e.target.value));
+    };
+    const handleProxyTimeoutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(setProxyTimeout(parseInt(e.target.value)));
+    };
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -34,10 +65,8 @@ export function AppSettingPopover() {
                         <div className="grid grid-cols-3 items-center gap-4">
                             <Label htmlFor="width">Server URL</Label>
                             <Input
-                                disabled={isConnectedToServer}
-                                id="serverUrl"
                                 value={wsUrl}
-                                onChange={(e) => setWsUrl(e.target.value)}
+                                onChange={handleUrlChange}
                                 className="col-span-2 h-8"
                                 placeholder="Server URL"
                             />
@@ -45,8 +74,8 @@ export function AppSettingPopover() {
                         <div className="grid grid-cols-3 items-center gap-4">
                             <Label htmlFor="maxWidth">Proxy</Label>
                             <Input
-                                id="proxy"
-                                defaultValue="127.0.0.1:8080"
+                                onChange={handleProxyUrlChange}
+                                defaultValue={proxyUrl}
                                 className="col-span-2 h-8"
                                 disabled={true}
                             />
@@ -54,8 +83,8 @@ export function AppSettingPopover() {
                         <div className="grid grid-cols-3 items-center gap-4">
                             <Label htmlFor="height">Proxy Timeout</Label>
                             <Input
-                                id="proxy_to"
-                                defaultValue="10000"
+                                onChange={handleProxyTimeoutChange}
+                                defaultValue={proxyTimeout.toString()}
                                 className="col-span-2 h-8"
                                 disabled={true}
                             />

@@ -12,24 +12,38 @@ import {
 import { Label } from "@/components/ui/label"
 import { PenIcon } from "lucide-react"
 import { Switch } from "../ui/switch"
-import { useContext } from "react"
-import { AppContext } from "../app-context"
-export type PreferencesType = "show_gift_level_badge" | "show_mod_badge" | "show_relation_status"
-export const DEFAULT_PREFERENCES: { [key: string]: boolean } = {
-  "show_gift_level_badge": true,
-  "show_mod_badge": true,
-  "show_relation_status": true,
-  "show_relative_timestamp": false
-}
-export const PREFERENCES_LABEL: { [key: string]: string } = {
+import { useDispatch, useSelector } from "react-redux"
+import { RootState } from "@/store"
+import { setPreferences } from "@/store/preferencesSlice"
+import { PreferencesState, PreferencesType } from "@/lib/types/common"
+import { useEffect } from "react"
+import useLocalStorage from "@/hooks/use-localstorage"
+
+const PREFERENCES_LABEL: { [key: string]: string } = {
   "show_gift_level_badge": "Gift Level Badge",
   "show_mod_badge": "Moderator Badge",
   "show_relation_status": "Relationship Badge",
   "show_relative_timestamp": "Relative timestamp"
 }
-
 export default function PreferencesButton() {
-  const { preferences, handlePreferencesSwitch } = useContext(AppContext)
+  const preferences = useSelector(({ preferences }: RootState) => preferences)
+  const dispatch = useDispatch()
+
+  const { set, get } = useLocalStorage()
+  const handlePreferencesSwitch = ({ key, value }: { key: keyof PreferencesState, value: boolean }) => {
+    dispatch(setPreferences({ [key]: value }))
+    set('options:preferences', JSON.stringify({ [key]: value }))
+  }
+
+  useEffect(() => {
+    const savedPreferences = get('options:preferences')
+    if (savedPreferences) {
+      const parsedSavedPreferences = JSON.parse(savedPreferences)
+      for (const [key, value] of Object.entries(parsedSavedPreferences)) {
+        dispatch(setPreferences({ [key]: value }))
+      }
+    }
+  }, [])
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -44,16 +58,14 @@ export default function PreferencesButton() {
         </DialogHeader>
         <div className="text-xs px-2 flex flex-col gap-1">
           {
-            Object.keys(DEFAULT_PREFERENCES).map((key => (
+            Object.keys(preferences).map(((key) => (
               <div key={key} className="flex items-center space-x-2 uppercase">
-                <Switch id={key} checked={preferences[key]} onCheckedChange={(e) => handlePreferencesSwitch(key, e)} />
+                <Switch id={key} checked={preferences[key as keyof PreferencesState]}
+                  onCheckedChange={(value) => handlePreferencesSwitch({ key: key as PreferencesType, value })} />
                 <Label htmlFor={key}>{PREFERENCES_LABEL[key]}</Label>
               </div>
             )))
           }
-
-
-
         </div>
         <DialogFooter>
           {/* Auto */}

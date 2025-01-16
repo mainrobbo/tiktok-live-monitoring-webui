@@ -11,25 +11,24 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { useContext, useState } from "react";
-import { AppContext } from "../app-context";
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { cleanLogs } from "@/store/logsSlice"
+import { getAllLogs } from "../selector/logs";
+
 export default function CleanButton() {
     const [open, setOpen] = useState(false)
-    const {
-        handleCleanLogsClick,
-        isConnectedToServer,
-        logs
-    } = useContext(AppContext);
+    const dispatch = useDispatch()
+    const allLogs = useSelector(getAllLogs)
+    const handleCleanLogs = () => dispatch(cleanLogs())
 
     return (
-
         <>
-
             <AlertDialog open={open} onOpenChange={setOpen}>
                 <AlertDialogTrigger asChild>
                     <Button size={"sm"} variant={"outline"}
-                        disabled={logs.length == 0}
+                        disabled={allLogs.length == 0}
                     ><Trash2 /></Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -40,7 +39,7 @@ export default function CleanButton() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction onClick={handleCleanLogsClick}>Continue</AlertDialogAction>
+                        <AlertDialogAction onClick={handleCleanLogs}>Continue</AlertDialogAction>
                         <AlertDialogCancel>Cancel
                         </AlertDialogCancel>
                     </AlertDialogFooter>

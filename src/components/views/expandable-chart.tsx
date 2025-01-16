@@ -29,10 +29,9 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useExpandable } from "@/hooks/use-expandable";
-import { debounce } from "lodash";
-import { AppContext } from "../app-context";
+import _ from "lodash";
 import moment from "moment";
-import { ActivityType, LogsData } from "@/lib/types/common";
+import { ActivityType, } from "@/lib/types/common";
 import {
     ChartConfig,
     ChartContainer,
@@ -44,8 +43,23 @@ import {
 import MenuBarChart from "./summary";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 import NumberFlow from "@number-flow/react";
+import { useSelector } from "react-redux";
+import { getAllLogs } from "../selector/logs";
+import { LogData } from "@/lib/types/log";
 
-type ChartData = { createTime: string } & { [key in ActivityType]: number }
+type ChartData = {
+    [key: string]: {
+        createTime: string;
+        gift: number;
+        view: number;
+        like: number;
+        comment: number;
+        share: number;
+        social: number;
+        subscribe: number;
+        mic_armies: number;
+    };
+};
 
 
 const chartConfig = {
@@ -80,61 +94,63 @@ const chartConfig = {
 
 
 export default function ExpandableChart() {
-    console.log("is rerender")
     const { isExpanded, toggleExpand, animatedHeight } = useExpandable();
     const contentRef = useRef<HTMLDivElement>(null);
     const [width, setWidth] = useState(0);
     const [activeChart, setActiveChart] = useState<string[]>(["like", "comment", "gift"])
-    const { logs } = useContext(AppContext)
+    const logs = useSelector(getAllLogs)
     const [debouncedLogs, setDebouncedLogs] = useState(logs);
-    const debouncedSetLogs = useMemo(
-        () => debounce((logs) => setDebouncedLogs(logs), 5000), [logs]);
+    const debouncedSetLogs = useCallback(_.debounce((l) => {
+        console.log('Debounced logs update:', l);
+        setDebouncedLogs(l)
+    }, 3000), [logs])
 
     useEffect(() => {
         debouncedSetLogs(logs);
-    }, [logs, debouncedSetLogs]);
-    const removeActiveChart = (val: string) => {
-        const temporary = [...activeChart]
-        const findIndex = temporary.findIndex(x => x == val)
-        if (findIndex === -1) {
-            temporary.push(val)
-        } else {
-            temporary.splice(findIndex, 1)
-        }
-        setActiveChart(temporary)
-    }
+    }, [logs]);
     const transformedData = useCallback(() => {
-        const countOccurrences = debouncedLogs.reduce((res: { [key: string]: ChartData }, log: LogsData) => {
-            const { data, type } = log;
-            const { createTime: time, likeCount }: { createTime: string, likeCount: number } = data;
+        const countOccurrences = debouncedLogs.reduce((res: any, log: any) => {
+            const { createTime: time, likeCount, log_type: type } = log;
             const createTime = moment(moment.unix(Math.round(parseInt(time) / 1000))).format('hh:mm');
-            if (!res[createTime]) {
-                res[createTime] = { createTime, gift: 0, view: 0, like: 0, comment: 0, share: 0, social: 0 };
+            if (!res[createTime as keyof ChartData]) {
+                res[createTime] = { createTime, gift: 0, view: 0, like: 0, comment: 0, share: 0, social: 0, subscribe: 0, mic_armies: 0 };
             }
-            if (type == ActivityType.LIKE) {
-                res[createTime][type as ActivityType] += likeCount
-            } else { res[createTime][type as ActivityType]++; }
+            if (type === ActivityType.LIKE) {
+                res[createTime][type] += likeCount
+            } else { res[createTime][type]++; }
             return res;
-        }, {} as ChartData);
+        }, {} as { createTime?: string, like: number, comment: number, gift: number, share: number, view: number, subscribe: number, social: number });
 
-        return (Object.values(countOccurrences) as ChartData[]).map(({ createTime, gift, view, like, comment, share, social }) => ({
+        return (Object.values(countOccurrences) as {
+            createTime: string;
+            gift: number;
+            view: number;
+            like: number;
+            comment: number;
+            social: number;
+            share: number;
+            subscribe: number;
+            mic_armies: number;
+        }[]).map(({ createTime, gift, view, like, comment, share, social, subscribe, mic_armies }) => ({
             createTime,
             gift,
             view,
             like,
             comment,
             social,
-            share
+            share,
+            subscribe, mic_armies
         }));
     }, [debouncedLogs]);
     const lastDate = useCallback(() => {
-        const last = debouncedLogs.map((log: LogsData) => {
-            const { data } = log
-            return parseInt(data.createTime)
+        const last = debouncedLogs.map((log: LogData) => {
+            const { createTime } = log
+            return parseInt(createTime)
         }).sort((a: number, b: number) => a - b)
-        return moment(moment.unix(parseInt(last[0]) / 1000)).fromNow()
+        return moment(moment.unix(parseInt(last[0].toString()) / 1000)).fromNow()
 
     }, [debouncedLogs]);
+
     // TODO Bug - Reproduce: Start - Stop.
     const transformedDataArray = useMemo(() => transformedData(), [transformedData]); // Only depend on transformedData
     const total = useMemo(
@@ -165,7 +181,16 @@ export default function ExpandableChart() {
             animatedHeight.set(isExpanded ? contentRef.current.scrollHeight : 0);
         }
     }, [isExpanded, animatedHeight]);
-
+    const removeActiveChart = (val: string) => {
+        const temporary = [...activeChart]
+        const findIndex = temporary.findIndex(x => x == val)
+        if (findIndex === -1) {
+            temporary.push(val)
+        } else {
+            temporary.splice(findIndex, 1)
+        }
+        setActiveChart(temporary)
+    }
     return (
         <Card
             className="w-full transition-all duration-300 hover:shadow-lg h-full pb-0"
@@ -179,7 +204,7 @@ export default function ExpandableChart() {
                     </div>
 
                 </CardHeader>
-                <div className="px-5 py-2"> <MenuBarChart /></div>
+                {/* <div className="px-5 py-2"> <MenuBarChart /></div> */}
             </div>
 
             <motion.div
@@ -353,7 +378,7 @@ export default function ExpandableChart() {
             </motion.div>
             <CardFooter className="p-0 w-full">
                 <div className="flex flex-col w-full">
-                    <div className={`grid grid-cols-2 lg:flex justify-items-stretch w-full border-b ${isExpanded ? `border-t` : `border-t-0`}`}>
+                    {/* <div className={`grid grid-cols-2 lg:flex justify-items-stretch w-full border-b ${isExpanded ? `border-t` : `border-t-0`}`}>
                         {["view", "like", "comment", "gift", "share", "social"].map((key, i) => {
                             const chart = key as keyof typeof chartConfig
                             return (
@@ -380,7 +405,7 @@ export default function ExpandableChart() {
                                 </button>
                             )
                         })}
-                    </div>
+                    </div> */}
                     <span className="px-3 py-3  text-sm text-muted-foreground">Latest activity at {(debouncedLogs.length > 0) && lastDate()}</span>
                 </div>
             </CardFooter>

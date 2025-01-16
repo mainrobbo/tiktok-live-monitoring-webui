@@ -8,30 +8,25 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { useContext, useState } from "react";
-import { AppContext } from "../app-context";
+import { SocketActionType } from "@/lib/types/common";
+import { RootState } from "@/store";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 export default function ConnectButton() {
     const [open, setOpen] = useState(false)
-    const {
-        handleConnectButtonClick,
-        username,
-        isConnectedToServer,
-        logs
-    } = useContext(AppContext);
+
+    const { username } = useSelector(({ setting }: { setting: RootState["setting"] }) => setting);
+    const { live, wsUrl } = useSelector(({ connection }: { connection: RootState["connection"] }) => connection);
+    const dispatch = useDispatch();
     const connectButton = () => {
-        if (logs.length > 0) {
-            setOpen(true)
-        } else {
-            handleConnectButtonClick()
-        }
+        dispatch({ type: SocketActionType.START, payload: { url: wsUrl, username } });
     }
     return (
         <>
             <Button size={"sm"} className="w-full bg-emerald-500"
-                disabled={!username || isConnectedToServer}
+                disabled={!username || live || !wsUrl}
                 onClick={connectButton}
             >Start</Button>
             <AlertDialog open={open} onOpenChange={setOpen}>
@@ -44,7 +39,7 @@ export default function ConnectButton() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogAction onClick={handleConnectButtonClick}>Continue</AlertDialogAction>
+                        <AlertDialogAction onClick={connectButton}>Continue</AlertDialogAction>
                         <AlertDialogCancel>Cancel
                         </AlertDialogCancel>
                     </AlertDialogFooter>

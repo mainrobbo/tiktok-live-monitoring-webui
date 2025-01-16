@@ -11,13 +11,13 @@ export default function Home() {
 
       <RoomInfoComponent />
 
-      {/* <div className="w-full lg:col-span-3">
+      <div className="w-full lg:col-span-3">
         <ExpandableChart />
-      </div> */}
+      </div>
       <ChatList />
-      {/* <LikeList />
+      <LikeList />
       <ViewList />
-      <GiftList /> */}
+      <GiftList />
     </div>
   );
 }

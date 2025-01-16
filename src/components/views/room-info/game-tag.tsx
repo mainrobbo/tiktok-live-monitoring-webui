@@ -1,20 +1,7 @@
 import { Button } from "@/components/ui/button"
+import { GameTag } from "@/lib/types/liveInfo"
 import { Gamepad2 } from "lucide-react"
 
-export type GameTag = {
-    bundle_id: string,
-    full_name: string
-    game_category: any[]
-    hashtag_id: number[]
-    hashtag_list: any[]
-    id: number
-    is_new_game: boolean
-    landscape: number
-    package_name: string
-    short_name: string
-    show_name: string
-
-}
 export default function GameTagRoomInfo({ tags, hashtag }: { tags: GameTag[], hashtag?: string }) {
     if (!tags || tags.length == 0) return <></>
     return <div className="flex flex-col">

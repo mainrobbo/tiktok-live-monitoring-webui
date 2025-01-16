@@ -1,23 +1,70 @@
 "use client"
-import React from 'react';
-import { useAppContext } from './app-context';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from "@/components/ui/sidebar"
+import { Separator } from "./ui/separator"
+import { BellRingIcon, ChartBarBigIcon, } from "lucide-react"
+import ExportButton from "./button/export-button"
+import { AppSettingPopover } from "./app-settings"
+import ConnectButton from "./button/connect-button"
+import PreferencesButton from "./button/preferences-button"
+import CleanButton from "./button/clean-button"
+import { UsernameInput } from "./input"
+import DisconnectButton from "./button/disconnect-button"
 
-export const AppSidebar = () => {
-    const { username, setUsername } = useAppContext();
-
-    const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setUsername(event.target.value);
-    };
+export function AppSidebar() {
 
     return (
-        <div>
-            <input
-                type="text"
-                value={username}
-                onChange={handleUsernameChange}
-                placeholder="Enter username"
-            />
-        </div>
-    );
-};
-
+        <Sidebar>
+            <SidebarHeader>
+                <h1 className="text-xl text-center">
+                    Advanced Tiktok Live
+                </h1>
+                <Separator />
+            </SidebarHeader>
+            <SidebarContent>
+                <SidebarGroup>
+                    <UsernameInput />
+                    <div className="flex items-center mt-2 gap-1">
+                        <ConnectButton />
+                        <DisconnectButton />
+                        <CleanButton />
+                        <AppSettingPopover />
+                    </div>
+                    <PreferencesButton />
+                </SidebarGroup>
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton disabled>
+                                    <BellRingIcon />Stream Overlay
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton disabled>
+                                    <ChartBarBigIcon />Streaming Graph
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </SidebarContent>
+            <SidebarFooter>
+                <div className="flex items-center">
+                    {/* <Button size={"icon"}><DownloadIcon /></Button> */}
+                    <ExportButton />
+                </div>
+            </SidebarFooter>
+        </Sidebar>
+    )
+}

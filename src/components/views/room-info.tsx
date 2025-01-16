@@ -1,47 +1,52 @@
 "use client"
-import { memo, Suspense, useContext, useRef } from "react";
+import { memo, Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import VideoPlayer from "./media-player";
-import { AppContext } from "../app-context";
 import GameTagRoomInfo from "./room-info/game-tag";
 import { Button } from "../ui/button";
+import { useSelector } from "react-redux";
+import { getLiveInfo } from "../selector/liveInfo";
 const RoomInfoComponent = memo(() => {
-    const { liveInfo } = useContext(AppContext)
-    if (!liveInfo?.hashtag?.title) return <></>
-    console.log(liveInfo)
+    const { roomInfo } = useSelector(getLiveInfo);
+    if (!roomInfo?.hashtag?.title) return <></>
+    const getStreamingUrl = () => {
+        if (!roomInfo?.stream_url?.hls_pull_url && !roomInfo?.stream_url?.flv_pull_url) return false
+        if (roomInfo?.stream_url?.hls_pull_url != "") return roomInfo?.stream_url?.hls_pull_url
+        if (roomInfo?.stream_url?.flv_pull_url?.HD1 != "") return roomInfo?.stream_url?.flv_pull_url?.HD1
+        if (roomInfo?.stream_url?.flv_pull_url?.SD1 != "") return roomInfo?.stream_url?.flv_pull_url?.SD1
+        return false
+    }
+    console.log(getStreamingUrl())
     return (
-        <div className="flex items-start w-full lg:col-span-3 gap-2">
-            <Card className="w-fit">
+        <div className="flex flex-col lg:flex-row items-start w-full lg:col-span-3 gap-2">
+            <Card className="">
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between">
-                        {liveInfo.hashtag?.title && <Button
+                        {roomInfo.hashtag?.title && <Button
                             variant={"outline"}
-                            onClick={() => window.open(`https://tiktok.com/live/${liveInfo.hashtag?.title?.toLowerCase()}`, '_blank')}
-                            className="opacity-60 tracking-wide font-semibold uppercase">#{liveInfo.hashtag?.title?.toLowerCase()}</Button>}
+                            onClick={() => window.open(`https://tiktok.com/live/${roomInfo.hashtag?.title?.toLowerCase()}`, '_blank')}
+                            className="opacity-60 tracking-wide font-semibold uppercase">#{roomInfo.hashtag?.title?.toLowerCase()}</Button>}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {liveInfo?.stream_url?.flv_pull_url && (
-                        <div className="flex w-full justify-center">
-                            <div className="lg:w-[240px]">
-                                <Suspense fallback={<div>Loading...</div>}>
-                                    <VideoPlayer src={liveInfo.stream_url.hls_pull_url} />
-                                </Suspense>
-                            </div>
+                    {getStreamingUrl() && (
+                        <div className="flex flex-col w-fit justify-center gap-2 items-center">
+                            <Suspense fallback={<div>Loading...</div>}>
+                                <VideoPlayer src={getStreamingUrl() as string} />
+                            </Suspense>
                         </div>
                     )}
-
                 </CardContent>
             </Card>
             <Card className="w-full">
                 <CardHeader>
                     <CardTitle>
-                        <span className="font-medium tracking-wide text-muted-foreground">Title:</span> {liveInfo?.title}
+                        <span className="font-medium tracking-wide text-muted-foreground">Title:</span> {roomInfo?.title}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    {liveInfo?.game_tag && <div className="flex items-start">
-                        <GameTagRoomInfo tags={liveInfo?.game_tag} hashtag={liveInfo?.hashtag?.title?.toLowerCase()} />
+                    {roomInfo?.game_tag && <div className="flex items-start">
+                        <GameTagRoomInfo tags={roomInfo?.game_tag} hashtag={roomInfo?.hashtag?.title?.toLowerCase()} />
                     </div>}
                 </CardContent>
             </Card>

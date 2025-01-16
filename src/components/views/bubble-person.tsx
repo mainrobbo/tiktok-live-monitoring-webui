@@ -1,4 +1,4 @@
-import { ActivityType, LogsData } from "@/lib/types/common";
+import { ActivityType } from "@/lib/types/common";
 
 import {
     Avatar,
@@ -10,8 +10,9 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { useContext } from "react";
-import { AppContext } from "../app-context";
+import { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { LogData } from "@/lib/types/log";
 const gifterLevelColors = (level: number) => {
     if (level == 0) {
         return "bg-amber-500 bg-opacity-20";
@@ -25,8 +26,8 @@ const gifterLevelColors = (level: number) => {
         return "bg-yellow-300";
     }
 };
-export default function BubblePerson({ logsData, icon = false }: { logsData: LogsData, icon?: boolean }) {
-    const { type, data } = logsData
+export default function BubblePerson({ logsData, icon = false }: { logsData: LogData, icon?: boolean }) {
+    const { log_type: type, gifterLevel, isRejoin, nickname, uniqueId, followInfo, userDetails, isModerator, profilePictureUrl } = logsData
     const icons = {
         [ActivityType.COMMENT]: "💬",
         [ActivityType.GIFT]: "🎁",
@@ -35,8 +36,7 @@ export default function BubblePerson({ logsData, icon = false }: { logsData: Log
         [ActivityType.SHARE]: "🔗",
         [ActivityType.SOCIAL]: "👤",
     };
-    const { userDetails, followInfo } = data
-    const { preferences } = useContext(AppContext)
+    const preferences = useSelector(({ preferences }: RootState) => preferences)
     return (
 
         <div className="flex items-center gap-2 ">
@@ -44,19 +44,19 @@ export default function BubblePerson({ logsData, icon = false }: { logsData: Log
             <Popover>
                 <PopoverTrigger asChild>
                     <div className="hover:underline hover:cursor-pointer">
-                        <span className="font-semibold">{data.nickname ?? data.uniqueId}</span>
-                        {(data.isModerator && preferences.show_mod_badge) && <span>🛠️</span>}
+                        <span className="font-semibold">{nickname ?? uniqueId}</span>
+                        {(isModerator && preferences.show_mod_badge) && <span>🛠️</span>}
                     </div>
                 </PopoverTrigger>
                 <PopoverContent className="w-80">
                     <div className="flex gap-5 items-center">
                         <Avatar>
-                            <AvatarImage src={data.profilePictureUrl} />
+                            <AvatarImage src={profilePictureUrl} />
                             <AvatarFallback>VC</AvatarFallback>
                         </Avatar>
                         <div className="">
-                            <h4 className="text-base font-semibold">{data.nickname}</h4>
-                            <h4 className="text-sm">@{data.uniqueId}</h4>
+                            <h4 className="text-base font-semibold">{nickname}</h4>
+                            <h4 className="text-sm">@{uniqueId}</h4>
                             <p className="text-sm">
                                 {userDetails?.bioDescription ?? ""}
                             </p>
@@ -74,13 +74,13 @@ export default function BubblePerson({ logsData, icon = false }: { logsData: Log
             </Popover>
             {preferences.show_gift_level_badge && <span
                 className={`${gifterLevelColors(
-                    data.gifterLevel ?? 0
+                    gifterLevel ?? 0
                 )} flex gap-2 items-center px-1.5 rounded-md text-xs`}
             >
-                💎{data.gifterLevel ?? 0}
+                💎{gifterLevel ?? 0}
             </span>}
 
-            {type == ActivityType.VIEW && (data.isRejoin ? <span>Rejoined the stream.</span> : <span>Joined the stream.</span>)}
+            {type == ActivityType.VIEW && (isRejoin ? <span>Rejoined the stream.</span> : <span>Joined the stream.</span>)}
         </div>
 
 

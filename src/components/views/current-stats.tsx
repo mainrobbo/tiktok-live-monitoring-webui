@@ -2,7 +2,7 @@
 import { debounce } from "lodash";
 import { ActivityType, LogsData } from "@/lib/types/common";
 import { useContext, useEffect, useRef, useState, useMemo } from "react";
-import { AppContext } from "../app-context";
+import { AppContext } from "../app-context.tsx.bak";
 import NumberFlow from "@number-flow/react";
 
 export default function CurrentStatistic() {

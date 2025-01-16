@@ -36,7 +36,8 @@ export default function RootLayout({
           <AppLayout>
             {children}
           </AppLayout>
-        </body></ReactLenis>
+        </body>
+      </ReactLenis>
     </html>
   );
 }

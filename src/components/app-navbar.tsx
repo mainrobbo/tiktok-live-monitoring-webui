@@ -1,15 +1,17 @@
 "use client"
-import { DotIcon, SignalIcon, WifiHighIcon, WifiIcon } from "lucide-react";
-import { useContext } from "react";
-import { AppContext } from "./app-context";
+import { WifiIcon } from "lucide-react";
 import Link from "next/link";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 export default function AppNavbar() {
-    const { isConnectedToServer, isLive, username } = useContext(AppContext)
+    const { live, connected } = useSelector(({ connection }: { connection: RootState["connection"] }) => connection)
+    const { username } = useSelector(({ setting }: { setting: RootState["setting"] }) => setting)
+
     return (<div className="sticky top-0 bg-background border-b p-2 z-50">
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-                {isLive ? (
+                {live ? (
                     <>
                         <div className="animate-pulse">
                             🔴
@@ -21,7 +23,7 @@ export default function AppNavbar() {
                 )}
             </div>
             <div className="flex items-center" title="Not connected to server">
-                <WifiIcon className={isConnectedToServer ? `text-emerald-500` : `text-red-500`} />
+                <WifiIcon className={connected ? `text-emerald-500` : `text-red-500`} />
             </div>
         </div>
     </div>)
