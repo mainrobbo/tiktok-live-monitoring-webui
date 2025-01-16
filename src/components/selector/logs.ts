@@ -1,45 +1,53 @@
 'use client'
 import { ActivityType } from '@/lib/types/common'
 import { RootState } from '@/store'
+import { LogEntry } from '@/store/logsSlice'
 import { createSelector } from '@reduxjs/toolkit'
-
-export const comments = ({ logs }: RootState) => logs.comment
-export const likes = ({ logs }: RootState) => logs.like
-export const views = ({ logs }: RootState) => logs.view
-export const share = ({ logs }: RootState) => logs.share
-export const social = ({ logs }: RootState) => logs.social
-export const gift = ({ logs }: RootState) => logs.gift
-export const subscribe = ({ logs }: RootState) => logs.subscribe
+const LIMIT = 25
+const getLimited = (log: LogEntry[]) =>
+  log
+    .sort((a, b) => parseInt(b.data.createTime) - parseInt(a.data.createTime))
+    .slice(0, LIMIT)
+export const comments = ({ logs }: RootState) => logs[ActivityType.COMMENT]
+export const views = ({ logs }: RootState) => logs[ActivityType.VIEW]
+export const share = ({ logs }: RootState) => logs[ActivityType.SHARE]
+export const social = ({ logs }: RootState) => logs[ActivityType.SOCIAL]
+export const gift = ({ logs }: RootState) => logs[ActivityType.GIFT]
+export const subscribe = ({ logs }: RootState) => logs[ActivityType.SUBSCRIBE]
 export const logs = ({ logs }: RootState) => logs
+export const likes = ({ logs }: RootState) => logs[ActivityType.LIKE]
 export const getLimitedLikes = createSelector([likes], likes =>
-  likes.slice(0, 25),
+  getLimited(Array.from(likes.values())),
 )
 export const getLimitedComments = createSelector([comments], comments =>
-  comments.slice(0, 25),
+  getLimited(Array.from(comments.values())),
 )
 export const getLimitedViews = createSelector([views], views =>
-  views.slice(0, 25),
+  getLimited(Array.from(views.values())),
 )
 export const getLimitedShare = createSelector([share], share =>
-  share.slice(0, 25),
+  getLimited(Array.from(share.values())),
 )
 export const getLimitedSocial = createSelector([social], social =>
-  social.slice(0, 25),
+  getLimited(Array.from(social.values())),
 )
-export const getLimitedGift = createSelector([gift], gift => gift.slice(0, 25))
+export const getLimitedGift = createSelector([gift], gift =>
+  getLimited(Array.from(gift.values())),
+)
 export const getLimitedSubscribe = createSelector([subscribe], subscribe =>
-  subscribe.slice(0, 25),
+  getLimited(Array.from(subscribe.values())),
 )
+
 export const getAllLogs = createSelector(
   [gift, social, comments, likes, views, share, subscribe],
   (gift, social, comments, likes, views, share, subscribe) => [
-    ...gift,
-    ...social,
-    ...comments,
-    ...likes,
-    ...views,
-    ...share,
-    ...subscribe,
+    ...Array.from(gift.values()),
+    ...Array.from(social.values()),
+    ...Array.from(comments.values()),
+    ...Array.from(likes.values()),
+    ...Array.from(views.values()),
+    ...Array.from(share.values()),
+    ...Array.from(subscribe.values()),
   ],
 )
 type UserData = {
@@ -55,13 +63,13 @@ export const getMostWordByFilter = createSelector(
   (state: RootState, uniqueId: string, word: string) => word,
   (state: RootState, uniqueId: string, word: string) => {
     if (!uniqueId && !word) return []
-    return state.logs.comment
+    return Array.from(state.logs.comment.values())
       .filter(
-        d =>
-          d.comment.toLowerCase().includes(word.toLowerCase()) &&
-          d.uniqueId.includes(uniqueId),
+        ({ data }) =>
+          data.comment.toLowerCase().includes(word.toLowerCase()) &&
+          data.uniqueId.includes(uniqueId),
       )
-      .map(data => ({
+      .map(({ data }) => ({
         comment: data.comment,
         time: data.createTime,
         user: {
@@ -80,9 +88,9 @@ export const getLikesByUniqueId = createSelector(
   (state: RootState, uniqueId?: string) => uniqueId,
   (state: RootState, uniqueId?: string) => {
     if (!uniqueId) return []
-    return state.logs.like
-      .filter(like => like.uniqueId.includes(uniqueId))
-      .map(data => ({
+    return Array.from(state.logs.like.values())
+      .filter(({ data }) => data.uniqueId.includes(uniqueId))
+      .map(({ data }) => ({
         count: data.likeCount,
         time: data.createTime,
       }))
@@ -92,11 +100,11 @@ export const getLikesByUniqueId = createSelector(
 )
 export const get10MostLikes = createSelector([likes], likes => {
   return Object.values(
-    likes.reduce(
-      (acc, user) => {
-        const { uniqueId, likeCount } = user
+    Array.from(likes.values()).reduce(
+      (acc, { data }) => {
+        const { uniqueId, likeCount } = data
         if (!acc[uniqueId]) {
-          acc[uniqueId] = { user: user, times: 0, total: 0 }
+          acc[uniqueId] = { user: data, times: 0, total: 0 }
         }
         acc[uniqueId].times++
         acc[uniqueId].total += likeCount
@@ -120,10 +128,10 @@ export type Most10CommentsOutputType = { user: UserData; times: number }
 export const get10MostComment = createSelector([comments], comments => {
   return (
     Object.values(
-      comments.reduce((acc, user) => {
-        const { uniqueId } = user
+      Array.from(comments.values()).reduce((acc, { data }) => {
+        const { uniqueId } = data
         if (!acc[uniqueId]) {
-          acc[uniqueId] = { user: user, times: 0 }
+          acc[uniqueId] = { user: data, times: 0 }
         }
         acc[uniqueId].times++
         return acc
@@ -150,19 +158,19 @@ export const get10MostActivity = createSelector(
   (comments, likes, views, share, subscribe, social, gift) => {
     return Object.values(
       [
-        ...comments,
-        ...likes,
-        ...views,
-        ...share,
-        ...subscribe,
-        ...social,
-        ...gift,
+        ...Array.from(comments.values()),
+        ...Array.from(likes.values()),
+        ...Array.from(views.values()),
+        ...Array.from(share.values()),
+        ...Array.from(subscribe.values()),
+        ...Array.from(social.values()),
+        ...Array.from(gift.values()),
       ].reduce(
-        (acc, user) => {
-          const { uniqueId, log_type } = user
+        (acc, { data }) => {
+          const { uniqueId, log_type } = data
           if (!acc[uniqueId]) {
             acc[uniqueId] = {
-              user: user,
+              user: data,
               total: 0,
               like: 0,
               comment: 0,
@@ -213,7 +221,7 @@ export const get10MostActivity = createSelector(
 
 export const get10MostWords = createSelector([comments], comments => {
   return Object.values(
-    comments.reduce((acc, data) => {
+    Array.from(comments.values()).reduce((acc, { data }) => {
       const { comment, userId } = data
       comment.split(' ').forEach((word: string) => {
         const lowerCaseWord = word.toLowerCase()
