@@ -46,14 +46,14 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           dispatch(setConnected(true))
           toast.success('Connected')
           localStorage.setItem('ZERATIKTOK:username', username)
-        })
-        socket.on('disconnect', () => {
-          dispatch(setConnected(false))
-          dispatch(setLive(false))
 
           /**  Totally clean all data**/
           dispatch(cleanLogs())
           viewUserIds.clear()
+        })
+        socket.on('disconnect', () => {
+          dispatch(setConnected(false))
+          dispatch(setLive(false))
         })
 
         //* Connection
