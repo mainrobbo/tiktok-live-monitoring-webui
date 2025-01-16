@@ -24,6 +24,14 @@ export const createBatcher = (dispatch: Dispatch) => {
       batches[type]!.push(log)
       processQueue()
     },
+    forceProcess: () => {
+      const allLogs = Object.values(batches).flat()
+      console.log(`forceProcess: ${allLogs.length}`)
+      if (allLogs.length > 0) {
+        dispatch(addLogs(allLogs))
+        batches = {}
+      }
+    },
   }
 }
 
