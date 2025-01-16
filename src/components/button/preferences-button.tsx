@@ -16,8 +16,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store'
 import { setPreferences } from '@/store/preferencesSlice'
 import { PreferencesState, PreferencesType } from '@/lib/types/common'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import useLocalStorage from '@/hooks/use-localstorage'
+import { Separator } from '../ui/separator'
+import { useTheme } from 'next-themes'
 
 const PREFERENCES_LABEL: { [key: string]: string } = {
   show_gift_level_badge: 'Gift Level Badge',
@@ -62,25 +64,50 @@ export default function PreferencesButton() {
           <DialogTitle>Preferences</DialogTitle>
           <DialogDescription>Custom unwanted things on UI.</DialogDescription>
         </DialogHeader>
-        <div className='text-xs px-2 flex flex-col gap-1'>
-          {Object.keys(preferences).map(key => (
-            <div key={key} className='flex items-center space-x-2 uppercase'>
-              <Switch
-                id={key}
-                checked={preferences[key as keyof PreferencesState]}
-                onCheckedChange={value =>
-                  handlePreferencesSwitch({
-                    key: key as PreferencesType,
-                    value,
-                  })
-                }
-              />
-              <Label htmlFor={key}>{PREFERENCES_LABEL[key]}</Label>
-            </div>
-          ))}
+        <div className='px-2 flex flex-col gap-2'>
+          <div className='flex flex-col gap-1'>
+            <div className='font-bold'>Chat</div>
+            {Object.keys(preferences).map(key => (
+              <div key={key} className='flex items-center space-x-2 uppercase'>
+                <Switch
+                  id={key}
+                  checked={preferences[key as keyof PreferencesState]}
+                  onCheckedChange={value =>
+                    handlePreferencesSwitch({
+                      key: key as PreferencesType,
+                      value,
+                    })
+                  }
+                />
+                <Label className='text-sm' htmlFor={key}>
+                  {PREFERENCES_LABEL[key]}
+                </Label>
+              </div>
+            ))}
+          </div>
+          <Separator className='my-2' />
+          <div className='flex flex-col gap-1'>
+            <div className='font-bold'>Theme</div>
+            <ThemeSwitch />
+          </div>
         </div>
+
         <DialogFooter>{/* Auto */}</DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function ThemeSwitch() {
+  const { theme, setTheme } = useTheme()
+
+  const handleSwitchTheme = (enable: boolean) => {
+    setTheme(enable ? 'dark' : 'light')
+  }
+  return (
+    <div className='flex items-center space-x-2 uppercase'>
+      <Switch checked={theme === 'dark'} onCheckedChange={handleSwitchTheme} />
+      <Label className='text-sm'>Dark Mode</Label>
+    </div>
   )
 }

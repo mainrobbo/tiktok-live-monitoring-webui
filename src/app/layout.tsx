@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import AppLayout from '@/components/app-layout'
 import ReactLenis from 'lenis/react'
+import { ThemeProvider } from 'next-themes'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,12 +27,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <ReactLenis root>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <AppLayout>{children}</AppLayout>
+          {' '}
+          <ThemeProvider defaultTheme='dark' attribute='class'>
+            <AppLayout>{children}</AppLayout>
+          </ThemeProvider>
         </body>
       </ReactLenis>
     </html>
