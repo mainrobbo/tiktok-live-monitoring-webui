@@ -14,6 +14,7 @@ import { SocketActionType } from '@/lib/types/common'
 import { RootState } from '@/store'
 import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { isLogsExist } from '../selector/logs'
 export default function ConnectButton() {
   const [open, setOpen] = useState(false)
 
@@ -23,12 +24,17 @@ export default function ConnectButton() {
   const { live, wsUrl } = useSelector(
     ({ connection }: { connection: RootState['connection'] }) => connection,
   )
+  const logs = useSelector(isLogsExist)
   const dispatch = useDispatch()
   const connectButton = () => {
-    dispatch({
-      type: SocketActionType.START,
-      payload: { url: wsUrl, username },
-    })
+    if (logs) {
+      setOpen(true)
+    } else {
+      dispatch({
+        type: SocketActionType.START,
+        payload: { url: wsUrl, username },
+      })
+    }
   }
   return (
     <>

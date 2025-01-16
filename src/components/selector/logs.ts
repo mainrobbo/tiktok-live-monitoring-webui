@@ -50,6 +50,22 @@ export const getAllLogs = createSelector(
     ...Array.from(subscribe.values()),
   ],
 )
+export const isLogsExist = createSelector(
+  [gift, social, comments, likes, views, share, subscribe],
+  (gift, social, comments, likes, views, share, subscribe) => {
+    return (
+      [
+        ...Array.from(gift.values()),
+        ...Array.from(social.values()),
+        ...Array.from(comments.values()),
+        ...Array.from(likes.values()),
+        ...Array.from(views.values()),
+        ...Array.from(share.values()),
+        ...Array.from(subscribe.values()),
+      ].length > 0
+    )
+  },
+)
 type UserData = {
   uniqueId: string
   userId: string
