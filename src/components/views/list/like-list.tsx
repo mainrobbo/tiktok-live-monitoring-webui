@@ -10,61 +10,82 @@ import { useSelector } from 'react-redux'
 import { getLimitedLikes } from '@/components/selector/logs'
 import { LogEntry } from '@/store/logsSlice'
 import { AnimatePresence, motion } from 'framer-motion'
-
+import { RootState } from '@/store'
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 export default function LikeList() {
   const [list, setList] = useState<LogEntry[]>([])
-  const logs = useSelector(getLimitedLikes)
-  const logsRef = useRef<LogEntry[]>(logs)
+  const logs = useSelector((state: RootState) => getLimitedLikes(state))
+  const chatsRef = useRef<LogEntry[]>(logs)
+  const [expanded, setIsExpanded] = useState(true)
+
   useEffect(() => {
-    logsRef.current = logs
+    chatsRef.current = logs
   }, [logs])
   const debouncedUpdateList = useRef(
     debounce(
       () => {
-        setList([...logsRef.current])
+        setList([...chatsRef.current])
       },
-      500,
+      300,
       { maxWait: 1000 },
     ),
   ).current
   useEffect(() => {
-    debouncedUpdateList() // Call debounced function
-    return () => debouncedUpdateList.cancel() // Clean up on unmount
+    debouncedUpdateList()
+    return () => debouncedUpdateList.cancel()
   }, [logs])
+
   return (
-    <Card className='text-sm'>
-      <CardHeader>
-        <CardTitle>Like</CardTitle>
+    <Card className='text-sm h-fit transition-all w-full'>
+      <CardHeader
+        className='cursor-pointer select-none'
+        onClick={() => setIsExpanded(prev => !prev)}
+      >
+        <CardTitle>Likes</CardTitle>
       </CardHeader>
-      <Separator />
-      <CardContent>
-        <ScrollArea className='h-[200px] rounded-md py-2 flex flex-col gap-2 w-full pr-4'>
-          <AnimatePresence>
-            {list.map(({ data }) => (
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 100, x: 0 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 260,
-                  damping: 20,
-                  delay: 0.1,
-                }}
-                key={data.msgId}
-                className='chat-bubble-container'
-              >
-                <BubbleTime time={data.createTime} />
-                <div className='flex flex-col items-start shrink'>
-                  <BubblePerson logsData={data} />
-                  <div className='text-left'>
-                    Send <b>{data.likeCount} likes</b>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </ScrollArea>
-      </CardContent>
+      {expanded && <Separator />}
+      <motion.div transition={{ type: 'spring', stiffness: 300, damping: 30 }}>
+        <AnimatePresence>
+          <Collapsible
+            open={expanded}
+            onOpenChange={setIsExpanded}
+            className='shadow-innerCustom'
+          >
+            <CollapsibleContent className='space-y-2 w-full'>
+              <CardContent className='p-0 pl-2 pb-1'>
+                <ScrollArea className='h-[250px] rounded-md flex flex-col gap-2 w-full'>
+                  {list.map(({ data }, index) => (
+                    <motion.div
+                      initial={{ opacity: 0, x: -50 }}
+                      animate={{ opacity: 100, x: 0 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 260,
+                        damping: 20,
+                        delay: 0.1 * index,
+                      }}
+                      key={data.msgId}
+                      className='chat-bubble-container'
+                    >
+                      <BubbleTime time={data.createTime} />
+                      <div className='flex flex-col items-start shrink'>
+                        <BubblePerson logsData={data} />
+                        <div className='text-left'>
+                          Send{' '}
+                          <span className='text-gray-500 font-semibold'>
+                            {data.likeCount}{' '}
+                          </span>
+                          likes
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </ScrollArea>
+              </CardContent>
+            </CollapsibleContent>
+          </Collapsible>
+        </AnimatePresence>
+      </motion.div>
     </Card>
   )
 }

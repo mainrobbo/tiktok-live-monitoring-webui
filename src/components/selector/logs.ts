@@ -16,8 +16,11 @@ export const gift = ({ logs }: RootState) => logs[ActivityType.GIFT]
 export const subscribe = ({ logs }: RootState) => logs[ActivityType.SUBSCRIBE]
 export const logs = ({ logs }: RootState) => logs
 export const likes = ({ logs }: RootState) => logs[ActivityType.LIKE]
-export const getLimitedLikes = createSelector([likes], likes =>
-  getLimited(Array.from(likes.values())),
+export const getLimitedLikes = createSelector(
+  (state: RootState) => state,
+  (state: RootState, limit = DEFAULT_LIMIT) => limit,
+  (state: RootState, limit = DEFAULT_LIMIT) =>
+    getLimited(Array.from(state.logs[ActivityType.LIKE].values()), limit),
 )
 export const getLimitedComments = createSelector(
   (state: RootState) => state,
@@ -25,8 +28,11 @@ export const getLimitedComments = createSelector(
   (state: RootState, limit = DEFAULT_LIMIT) =>
     getLimited(Array.from(state.logs[ActivityType.COMMENT].values()), limit),
 )
-export const getLimitedViews = createSelector([views], views =>
-  getLimited(Array.from(views.values())),
+export const getLimitedViews = createSelector(
+  (state: RootState) => state,
+  (state: RootState, limit = DEFAULT_LIMIT) => limit,
+  (state: RootState, limit = DEFAULT_LIMIT) =>
+    getLimited(Array.from(state.logs[ActivityType.VIEW].values()), limit),
 )
 export const getLimitedShare = createSelector([share], share =>
   getLimited(Array.from(share.values())),
@@ -34,8 +40,11 @@ export const getLimitedShare = createSelector([share], share =>
 export const getLimitedSocial = createSelector([social], social =>
   getLimited(Array.from(social.values())),
 )
-export const getLimitedGift = createSelector([gift], gift =>
-  getLimited(Array.from(gift.values())),
+export const getLimitedGift = createSelector(
+  (state: RootState) => state,
+  (state: RootState, limit = DEFAULT_LIMIT) => limit,
+  (state: RootState, limit = DEFAULT_LIMIT) =>
+    getLimited(Array.from(state.logs[ActivityType.GIFT].values()), limit),
 )
 export const getLimitedSubscribe = createSelector([subscribe], subscribe =>
   getLimited(Array.from(subscribe.values())),
