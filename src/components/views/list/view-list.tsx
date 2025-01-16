@@ -7,21 +7,26 @@ import { Separator } from '@/components/ui/separator'
 import BubblePerson from '../bubble-person'
 import BubbleTime from '../bubble-time'
 import { useSelector } from 'react-redux'
-import { LogData } from '@/lib/types/log'
-import { views } from '@/components/selector/logs'
+import { getLimitedViews } from '@/components/selector/logs'
+import { LogEntry } from '@/store/logsSlice'
+import { AnimatePresence, motion } from 'framer-motion'
 
 export default function ViewList() {
-  const [list, setList] = useState<LogData[]>([])
-  const logs = useSelector(views)
-  const logsRef = useRef<LogData[]>(logs)
+  const [list, setList] = useState<LogEntry[]>([])
+  const logs = useSelector(getLimitedViews)
+  const logsRef = useRef<LogEntry[]>(logs)
 
   useEffect(() => {
     logsRef.current = logs
   }, [logs])
   const debouncedUpdateList = useRef(
-    debounce(() => {
-      setList([...logsRef.current])
-    }, 500),
+    debounce(
+      () => {
+        setList([...logsRef.current])
+      },
+      500,
+      { maxWait: 1000 },
+    ),
   ).current
   useEffect(() => {
     debouncedUpdateList()
@@ -35,17 +40,27 @@ export default function ViewList() {
       <Separator />
       <CardContent>
         <ScrollArea className='h-[200px] rounded-md py-2 flex flex-col gap-2 w-full'>
-          {list.map((data, index) => (
-            <div
-              key={index}
-              className='flex items-start justify-items-start gap-2'
-            >
-              <BubbleTime time={data.createTime} />
-              <div className='flex flex-col items-start shrink'>
-                <BubblePerson logsData={data} />
-              </div>
-            </div>
-          ))}
+          <AnimatePresence>
+            {list.map(({ data }) => (
+              <motion.div
+                initial={{ opacity: 0, x: -150 }}
+                animate={{ opacity: 100, x: 0 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 260,
+                  damping: 20,
+                  delay: 0.3,
+                }}
+                key={data.msgId}
+                className='chat-bubble-container'
+              >
+                <BubbleTime time={data.createTime} />
+                <div className='flex flex-col items-start justify-start'>
+                  <BubblePerson logsData={data} />
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </ScrollArea>
       </CardContent>
     </Card>
