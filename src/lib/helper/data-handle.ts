@@ -13,7 +13,7 @@ export const createBatcher = (dispatch: Dispatch) => {
       dispatch(addLogs(allLogs))
       batches = {}
     }
-  }, 100)
+  }, 500)
 
   return {
     add: (log: LogData) => {

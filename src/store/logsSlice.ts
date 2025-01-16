@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ActivityType } from '@/lib/types/common'
 import { LogData } from '@/lib/types/log'
-import moment from 'moment'
 
 export type LogEntry = {
   id: string
@@ -23,7 +22,7 @@ const initialState: LogsMap = {
   [ActivityType.MIC_ARMIES]: new Map(),
 }
 
-const MAX_LOGS_PER_TYPE = 1000
+const MAX_LOGS_PER_TYPE = 1_000_000
 
 const logsSlice = createSlice({
   name: 'logs',
@@ -64,8 +63,21 @@ const logsSlice = createSlice({
         state[key as ActivityType].clear()
       })
     },
+    clearOldest: (
+      state,
+      action: PayloadAction<{ type: ActivityType; count: number }>,
+    ) => {
+      const { type, count } = action.payload
+      if (type in state) {
+        const entries = Array.from(state[type].entries())
+        const sortedEntries = entries.sort(
+          (a, b) => b[1].timestamp - a[1].timestamp,
+        )
+        state[type] = new Map(sortedEntries.slice(count))
+      }
+    },
   },
 })
 
-export const { addLogs, cleanLogs } = logsSlice.actions
+export const { addLogs, cleanLogs, clearOldest } = logsSlice.actions
 export default logsSlice.reducer
