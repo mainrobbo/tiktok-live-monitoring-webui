@@ -11,7 +11,7 @@ export const createBatcher = (dispatch: Dispatch) => {
     const allLogs = Object.values(batches).flat()
     if (allLogs.length > 0) {
       dispatch(addLogs(allLogs))
-      batches = {} // Clear all batches
+      batches = {}
     }
   }, 100)
 

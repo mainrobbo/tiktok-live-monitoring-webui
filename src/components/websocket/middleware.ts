@@ -7,22 +7,23 @@ import { CommentLog, LogData } from '@/lib/types/log'
 import { setLiveIntro, setMicBattle, setRoomInfo } from '@/store/liveInfoSlice'
 import { RootState } from '@/store'
 import { beforeAddLog, createBatcher } from '@/lib/helper/data-handle'
+import { cleanLogs } from '@/store/logsSlice'
 
 let socket: Socket | null = null
 const MAX_MESSAGES = 1000
 
 const websocketMiddleware: Middleware<{}, any> = store => {
   const batcher = createBatcher(store.dispatch)
+  const viewUserIds = new Set<string>()
+  let messageCount = 0
   return next => (action: any) => {
     const state = store.getState() as RootState
     const { dispatch } = store
     const username = state.setting.username
     const wsUrl = state.connection.wsUrl
-    let messageCount = 0
 
     const isRejoin = (userId: string): boolean => {
-      const logs = state.logs.view as LogData[]
-      return logs.some(log => log.userId === userId)
+      return viewUserIds.has(userId)
     }
 
     switch (action.type) {
@@ -49,6 +50,10 @@ const websocketMiddleware: Middleware<{}, any> = store => {
         socket.on('disconnect', () => {
           dispatch(setConnected(false))
           dispatch(setLive(false))
+
+          /**  Totally clean all data**/
+          dispatch(cleanLogs())
+          viewUserIds.clear()
         })
 
         //* Connection
@@ -186,9 +191,13 @@ const websocketMiddleware: Middleware<{}, any> = store => {
               dispatch({ type: 'logs/clearOldest', payload: 100 })
               messageCount -= 100
             }
+            const userId = data.userId
+            const isUserRejoin = isRejoin(userId)
+            viewUserIds.add(userId)
+
             const type = ActivityType.VIEW
             beforeAddLog(
-              { ...data, log_type: type, isRejoin: isRejoin(data.userId) },
+              { ...data, log_type: type, isRejoin: isUserRejoin },
               batcher,
             )
           } catch (err) {
@@ -209,6 +218,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
             console.error('data-subscribe', err)
           }
         })
+
         // * Listening micBattle
         socket.on('data-micBattle', data => {
           try {
