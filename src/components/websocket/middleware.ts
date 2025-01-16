@@ -1,36 +1,30 @@
 import { Dispatch, Middleware } from '@reduxjs/toolkit'
 import { ActivityType, SocketActionType } from '@/lib/types/common'
-import { addLogs } from '@/store/logsSlice'
 import io, { Socket } from 'socket.io-client'
 import { setConnected, setLive } from '@/store/connectionSlice'
 import { toast } from 'sonner'
 import { CommentLog, LogData } from '@/lib/types/log'
 import { setLiveIntro, setMicBattle, setRoomInfo } from '@/store/liveInfoSlice'
 import { RootState } from '@/store'
+import { beforeAddLog, createBatcher } from '@/lib/helper/data-handle'
+
 let socket: Socket | null = null
-function beforeAddLog<T extends LogData>(
-  data: T,
-  dispatchFn: Dispatch,
-  actionFn: (data: T) => any,
-) {
-  if (
-    data &&
-    (data.log_type == ActivityType.MIC_ARMIES ||
-      (data.userId && data.uniqueId && data.followInfo && data.userDetails))
-  ) {
-    dispatchFn(actionFn(data))
-  }
-}
-const websocketMiddleware: Middleware<{}, any> =
-  store => next => (action: any) => {
+const MAX_MESSAGES = 1000
+
+const websocketMiddleware: Middleware<{}, any> = store => {
+  const batcher = createBatcher(store.dispatch)
+  return next => (action: any) => {
     const state = store.getState() as RootState
     const { dispatch } = store
     const username = state.setting.username
     const wsUrl = state.connection.wsUrl
+    let messageCount = 0
+
     const isRejoin = (userId: string): boolean => {
       const logs = state.logs.view as LogData[]
       return logs.some(log => log.userId === userId)
     }
+
     switch (action.type) {
       case SocketActionType.START:
         if (socket === null || !socket.connected) {
@@ -101,8 +95,14 @@ const websocketMiddleware: Middleware<{}, any> =
           try {
             data = JSON.parse(data) as CommentLog
             if (data.comment) {
+              messageCount++
+              if (messageCount > MAX_MESSAGES) {
+                dispatch({ type: 'logs/clearOldest', payload: 100 })
+                messageCount -= 100
+              }
+
               const type = ActivityType.COMMENT
-              beforeAddLog({ ...data, log_type: type }, dispatch, addLogs)
+              beforeAddLog({ ...data, log_type: type }, batcher)
             }
             //TODO if (isNotifySound && showComment) SoundNotify({ type: "comment" });
           } catch (err) {
@@ -113,8 +113,14 @@ const websocketMiddleware: Middleware<{}, any> =
           try {
             data = JSON.parse(data)
             if (data.likeCount) {
+              messageCount++
+              if (messageCount > MAX_MESSAGES) {
+                dispatch({ type: 'logs/clearOldest', payload: 100 })
+                messageCount -= 100
+              }
+
               const type = ActivityType.LIKE
-              beforeAddLog({ ...data, log_type: type }, dispatch, addLogs)
+              beforeAddLog({ ...data, log_type: type }, batcher)
             }
           } catch (err) {
             console.error('data-like', err)
@@ -124,11 +130,20 @@ const websocketMiddleware: Middleware<{}, any> =
           try {
             data = JSON.parse(data)
             if (data.giftType) {
+              messageCount++
+              // Implement windowing
+              if (messageCount > MAX_MESSAGES) {
+                dispatch({ type: 'logs/clearOldest', payload: 100 }) // Clear oldest 100 messages
+                messageCount -= 100
+              }
               const type = ActivityType.GIFT
               beforeAddLog(
-                { ...data, log_type: type, isStreak: data.giftType === 1 },
-                dispatch,
-                addLogs,
+                {
+                  ...data,
+                  log_type: type,
+                  isStreak: data.giftType === 1,
+                },
+                batcher,
               )
             }
           } catch (err) {
@@ -138,8 +153,13 @@ const websocketMiddleware: Middleware<{}, any> =
         socket.on('data-share', data => {
           try {
             data = JSON.parse(data)
+            messageCount++
+            if (messageCount > MAX_MESSAGES) {
+              dispatch({ type: 'logs/clearOldest', payload: 100 })
+              messageCount -= 100
+            }
             const type = ActivityType.SHARE
-            beforeAddLog({ ...data, log_type: type }, dispatch, addLogs)
+            beforeAddLog({ ...data, log_type: type }, batcher)
           } catch (err) {
             console.error('data-share', err)
           }
@@ -147,8 +167,13 @@ const websocketMiddleware: Middleware<{}, any> =
         socket.on('data-social', data => {
           try {
             data = JSON.parse(data)
+            messageCount++
+            if (messageCount > MAX_MESSAGES) {
+              dispatch({ type: 'logs/clearOldest', payload: 100 })
+              messageCount -= 100
+            }
             const type = ActivityType.SOCIAL
-            beforeAddLog({ ...data, log_type: type }, dispatch, addLogs)
+            beforeAddLog({ ...data, log_type: type }, batcher)
           } catch (err) {
             console.error('data-social', err)
           }
@@ -156,11 +181,15 @@ const websocketMiddleware: Middleware<{}, any> =
         socket.on('data-member', data => {
           try {
             data = JSON.parse(data)
+            messageCount++
+            if (messageCount > MAX_MESSAGES) {
+              dispatch({ type: 'logs/clearOldest', payload: 100 })
+              messageCount -= 100
+            }
             const type = ActivityType.VIEW
             beforeAddLog(
               { ...data, log_type: type, isRejoin: isRejoin(data.userId) },
-              dispatch,
-              addLogs,
+              batcher,
             )
           } catch (err) {
             console.error('data-member', err)
@@ -169,8 +198,13 @@ const websocketMiddleware: Middleware<{}, any> =
         socket.on('data-subscribe', data => {
           try {
             data = JSON.parse(data)
+            messageCount++
+            if (messageCount > MAX_MESSAGES) {
+              dispatch({ type: 'logs/clearOldest', payload: 100 })
+              messageCount -= 100
+            }
             const type = ActivityType.SUBSCRIBE
-            beforeAddLog({ ...data, log_type: type }, dispatch, addLogs)
+            beforeAddLog({ ...data, log_type: type }, batcher)
           } catch (err) {
             console.error('data-subscribe', err)
           }
@@ -187,8 +221,13 @@ const websocketMiddleware: Middleware<{}, any> =
         socket.on('data-micArmies', data => {
           try {
             data = JSON.parse(data)
+            messageCount++
+            if (messageCount > MAX_MESSAGES) {
+              dispatch({ type: 'logs/clearOldest', payload: 100 })
+              messageCount -= 100
+            }
             const type = ActivityType.SUBSCRIBE
-            beforeAddLog({ ...data, log_type: type }, dispatch, addLogs)
+            beforeAddLog({ ...data, log_type: type }, batcher)
           } catch (err) {
             console.error('data-micArmies', err)
           }
@@ -217,5 +256,6 @@ const websocketMiddleware: Middleware<{}, any> =
 
     return next(action)
   }
+}
 
 export default websocketMiddleware
