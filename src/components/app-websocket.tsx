@@ -1,20 +1,20 @@
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 
 const WebSocketComponent = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch()
 
-    useEffect(() => {
-        // Start the WebSocket connection when the component is mounted
-        dispatch({ type: 'START_SOCKET' });
+  useEffect(() => {
+    // Start the WebSocket connection when the component is mounted
+    dispatch({ type: 'START_SOCKET' })
 
-        // Clean up (optional if needed)
-        return () => {
-            // Close WebSocket connection if needed
-        };
-    }, [dispatch]);
+    // Clean up (optional if needed)
+    return () => {
+      // Close WebSocket connection if needed
+    }
+  }, [dispatch])
 
-    return <div>WebSocket Listener Component</div>;
-};
+  return <div>WebSocket Listener Component</div>
+}
 
-export default WebSocketComponent;
+export default WebSocketComponent

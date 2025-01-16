@@ -1,10 +1,9 @@
 export class PlayPauseElement extends globalThis.HTMLElement {
+  constructor() {
+    super()
 
-    constructor() {
-        super();
-
-        this.attachShadow({ mode: 'open' });
-        this!.shadowRoot!.innerHTML = `
+    this.attachShadow({ mode: 'open' })
+    this!.shadowRoot!.innerHTML = `
         <style>
           :host {
             pointer-events: none;
@@ -22,26 +21,26 @@ export class PlayPauseElement extends globalThis.HTMLElement {
             content: 'Playing';
           }
         </style>
-      `;
-    }
+      `
+  }
 
-    get paused() {
-        return !this.hasAttribute('unpaused');
-    }
+  get paused() {
+    return !this.hasAttribute('unpaused')
+  }
 
-    play() {
-        this.toggleAttribute('unpaused', true);
-        this.dispatchEvent(new Event('play'));
-        this.dispatchEvent(new Event('playing'));
-        return Promise.resolve();
-    }
+  play() {
+    this.toggleAttribute('unpaused', true)
+    this.dispatchEvent(new Event('play'))
+    this.dispatchEvent(new Event('playing'))
+    return Promise.resolve()
+  }
 
-    pause() {
-        this.toggleAttribute('unpaused', false);
-        this.dispatchEvent(new Event('pause'));
-    }
+  pause() {
+    this.toggleAttribute('unpaused', false)
+    this.dispatchEvent(new Event('pause'))
+  }
 }
 
 if (globalThis.customElements && !globalThis.customElements.get('play-pause')) {
-    globalThis.customElements.define('play-pause', PlayPauseElement);
+  globalThis.customElements.define('play-pause', PlayPauseElement)
 }
