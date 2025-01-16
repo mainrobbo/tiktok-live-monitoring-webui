@@ -49,19 +49,17 @@ type UserData = {
   profilePictureUrl: string
 }
 
-//! TODO BUG
 export const getMostWordByFilter = createSelector(
   (state: RootState) => state,
-  (state: RootState, uniqueId?: string) => uniqueId,
-  (state: RootState, uniqueId?: string, word?: string) => word,
-  (state: RootState, uniqueId?: string, word?: string) => {
-    console.log({ uniqueId, word })
+  (state: RootState, uniqueId: string) => uniqueId,
+  (state: RootState, uniqueId: string, word: string) => word,
+  (state: RootState, uniqueId: string, word: string) => {
     if (!uniqueId && !word) return []
     return state.logs.comment
       .filter(
         d =>
-          d.comment.toLowerCase().includes(word ? word.toLowerCase() : '') &&
-          (d.uniqueId ? true : d.uniqueId === uniqueId),
+          d.comment.toLowerCase().includes(word.toLowerCase()) &&
+          d.uniqueId.includes(uniqueId),
       )
       .map(data => ({
         comment: data.comment,

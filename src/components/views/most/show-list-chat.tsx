@@ -12,7 +12,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ReactNode, useCallback, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { DataTable } from '../data-table'
 import { Button } from '@/components/ui/button'
 import { DialogTrigger } from '@radix-ui/react-dialog'
@@ -47,6 +47,25 @@ type UserData = {
 }
 
 type OutputType = { comment: string; user: UserData; time: string }
+type ItemWithKey<T> = {
+  [key: string]: any
+} & T
+
+function removeDuplicates<T>(
+  array: ItemWithKey<T>[],
+  key: keyof T,
+): ItemWithKey<T>[] {
+  const seen = new Set()
+  return array.filter(item => {
+    const keyValue = item[key]
+    if (seen.has(keyValue)) {
+      return false
+    } else {
+      seen.add(keyValue)
+      return true
+    }
+  })
+}
 
 export default function ShowListChat({
   word = '',
@@ -65,14 +84,22 @@ export default function ShowListChat({
   const [dialogOpen, setDialogOpen] = useState(dialogOpenState)
   const [showUsername, setShowUsername] = useState(false)
   const [selectedUsername, setSelectedUsername] = useState(username)
+
   const columnVisibility = {
     comment: true,
     user: username == '',
     time: true,
   }
+
   const mostWords = useSelector((state: RootState) =>
-    getMostWordByFilter(state, username, word),
+    getMostWordByFilter(state, '', word),
   )
+  const filteredMostWords = useMemo(() => {
+    return mostWords.filter(
+      d =>
+        d.user.uniqueId.includes(selectedUsername) && d.comment.includes(word),
+    )
+  }, [selectedUsername])
 
   const columns: ColumnDef<OutputType>[] = useMemo(
     () => [
@@ -114,9 +141,16 @@ export default function ShowListChat({
     [showUsername, mostWords],
   )
 
-  const listUserArray = useMemo(() => mostWords.map(u => u.user), [mostWords])
+  const listUserArray = useMemo(
+    () =>
+      removeDuplicates(
+        mostWords.map(u => u.user),
+        'id',
+      ),
+    [filteredMostWords],
+  )
   const table = useReactTable({
-    data: mostWords,
+    data: filteredMostWords,
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: {
