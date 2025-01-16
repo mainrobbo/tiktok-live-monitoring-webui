@@ -7,12 +7,13 @@ import { Separator } from '@/components/ui/separator'
 import BubblePerson from '../bubble-person'
 import BubbleTime from '../bubble-time'
 import { useSelector } from 'react-redux'
-import { comments } from '@/components/selector/logs'
+import { comments, getLimitedComments } from '@/components/selector/logs'
 import { LogData } from '@/lib/types/log'
+import { RootState } from '@/store'
 
 export default function ChatList() {
   const [list, setList] = useState<LogData[]>([])
-  const logs = useSelector(comments)
+  const logs = useSelector(getLimitedComments)
   const chatsRef = useRef<LogData[]>(logs)
 
   useEffect(() => {

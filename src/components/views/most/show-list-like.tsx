@@ -1,5 +1,4 @@
 'use query'
-import { AppContext } from '@/components/app-context'
 import {
   Dialog,
   DialogContent,
@@ -7,36 +6,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { LogsData } from '@/lib/types/common'
 import {
   CellContext,
   ColumnDef,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { DataTable } from '../data-table'
 import { Button } from '@/components/ui/button'
 import { DialogTrigger } from '@radix-ui/react-dialog'
-import Link from 'next/link'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { ArrowRightFromLineIcon, Check, ChevronsUpDown } from 'lucide-react'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
+import { ArrowRightFromLineIcon } from 'lucide-react'
 import moment from 'moment'
+import { useSelector } from 'react-redux'
+import { getLikesByUniqueId } from '@/components/selector/logs'
+import { RootState } from '@/store'
 type UserData = {
   uniqueId: string
   id: string
@@ -44,7 +28,7 @@ type UserData = {
   profilePictureUrl: string
 }
 
-type OutputType = { count: string; time: string; isStreak: boolean }
+type OutputType = { count: number; time: string }
 
 export default function ShowListLike({
   username = '',
@@ -61,32 +45,18 @@ export default function ShowListLike({
   const columnVisibility = {
     count: true,
     time: true,
-    isStreak: true,
   }
-  const { likes: data }: { likes: LogsData[] } = useContext(AppContext)
-  const getMostLikes = useMemo(() => {
-    return data
-      .filter(d => d.data.uniqueId == username)
-      .map(({ data }) => ({
-        count: data.likeCount,
-        time: data.createTime,
-        isStreak: data.isStreak,
-      }))
-      .sort((a, b) => b.count - a.count)
-  }, [data, username])
-
+  const likes = useSelector((state: RootState) =>
+    getLikesByUniqueId(state, username),
+  )
   const columns: ColumnDef<OutputType>[] = useMemo(
     () => [
       {
         accessorKey: 'count',
         header: () => <div className='text-left'>Like</div>,
         cell: ({ getValue, row }: CellContext<OutputType, unknown>) => {
-          const val = getValue() as string
-          return (
-            <div className='flex items-center'>
-              {row.original.isStreak && '🔥'} {val}
-            </div>
-          )
+          const val = getValue() as number
+          return <div className='flex items-center'>{val.toString()}</div>
         },
       },
       {
@@ -100,11 +70,11 @@ export default function ShowListLike({
         },
       },
     ],
-    [data],
+    [likes],
   )
 
   const table = useReactTable({
-    data: getMostLikes,
+    data: likes,
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: {

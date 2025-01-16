@@ -1,5 +1,4 @@
 'use query'
-import { AppContext } from '@/components/app-context'
 import {
   Dialog,
   DialogContent,
@@ -7,14 +6,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { LogsData } from '@/lib/types/common'
 import {
   CellContext,
   ColumnDef,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ReactNode, useCallback, useContext, useMemo, useState } from 'react'
+import { ReactNode, useCallback, useMemo, useState } from 'react'
 import { DataTable } from '../data-table'
 import { Button } from '@/components/ui/button'
 import { DialogTrigger } from '@radix-ui/react-dialog'
@@ -37,6 +35,10 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import moment from 'moment'
+import { LogData } from '@/lib/types/log'
+import { useSelector } from 'react-redux'
+import { get10MostWords, getMostWordByFilter } from '@/components/selector/logs'
+import { RootState } from '@/store'
 type UserData = {
   uniqueId: string
   id: string
@@ -68,22 +70,9 @@ export default function ShowListChat({
     user: username == '',
     time: true,
   }
-  const { comments: data }: { comments: LogsData[] } = useContext(AppContext)
-  const getMostWords = useCallback(() => {
-    return data
-      .filter(d => d.data.comment.toLowerCase().includes(word.toLowerCase()))
-      .map(({ data }) => ({
-        comment: data.comment,
-        time: data.createTime,
-        user: {
-          uniqueId: data.uniqueId,
-          id: data.userId,
-          nickname: data.nickname,
-          profilePictureUrl: data.profilePictureUrl,
-        },
-      }))
-      .sort((a, b) => b.comment.split('').length - a.comment.split('').length)
-  }, [data])
+  const mostWords = useSelector((state: RootState) =>
+    getMostWordByFilter(state, username, word),
+  )
 
   const columns: ColumnDef<OutputType>[] = useMemo(
     () => [
@@ -122,21 +111,12 @@ export default function ShowListChat({
         },
       },
     ],
-    [showUsername, data],
+    [showUsername, mostWords],
   )
 
-  const mostWordsArray = useMemo(
-    () =>
-      selectedUsername == ''
-        ? getMostWords()
-        : getMostWords().filter(
-            ({ user }) => user.uniqueId == selectedUsername,
-          ),
-    [data, selectedUsername],
-  )
-  const listUserArray = useMemo(() => getMostWords().map(u => u.user), [data])
+  const listUserArray = useMemo(() => mostWords.map(u => u.user), [mostWords])
   const table = useReactTable({
-    data: mostWordsArray,
+    data: mostWords,
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: {

@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { SocketActionType } from '@/lib/types/common'
 import { RootState } from '@/store'
 import { useDispatch, useSelector } from 'react-redux'
+import { getAllLogs } from '../selector/logs'
 export default function DisconnectButton() {
   const { live, connected } = useSelector(
     ({ connection }: { connection: RootState['connection'] }) => connection,
@@ -20,12 +21,13 @@ export default function DisconnectButton() {
   const { roomInfo, liveIntro } = useSelector(
     ({ liveInfo }: { liveInfo: RootState['liveInfo'] }) => liveInfo,
   )
+  const logs = useSelector(getAllLogs)
   const dispatch = useDispatch()
   const handleDisconnect = () => {
     dispatch({ type: SocketActionType.STOP })
   }
   const cek = () => {
-    console.log({ live, connected, roomInfo, liveIntro })
+    console.log(`Total logs:`, logs.length)
   }
   return (
     <>

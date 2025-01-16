@@ -1,5 +1,4 @@
 'use query'
-import { AppContext } from '@/components/app-context'
 import {
   Dialog,
   DialogContent,
@@ -7,23 +6,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { LogsData } from '@/lib/types/common'
 import {
   CellContext,
   ColumnDef,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useContext,
-  useMemo,
-} from 'react'
+import { Dispatch, SetStateAction, useMemo } from 'react'
 import { DataTable } from '../data-table'
 import Link from 'next/link'
 import ShowListChat from './show-list-chat'
+import { useSelector } from 'react-redux'
+import {
+  get10MostComment,
+  Most10CommentsOutputType,
+} from '@/components/selector/logs'
 
 type UserData = {
   uniqueId: string
@@ -31,7 +28,6 @@ type UserData = {
   nickname: string
   profilePictureUrl: string
 }
-type OutputType = { user: UserData; times: string }
 export default function MostChat({
   open,
   setOpen,
@@ -39,33 +35,15 @@ export default function MostChat({
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
-  const { comments: data }: { comments: LogsData[] } = useContext(AppContext)
-  const getMostLikes = useCallback(() => {
-    const countOccurrences = data.reduce(
-      (acc, user) => {
-        const { uniqueId } = user.data
-        if (!acc[uniqueId]) {
-          acc[uniqueId] = { user: user.data, times: 0 }
-        }
-        acc[uniqueId].times++
-        return acc
-      },
-      {} as { [key: string]: { user: UserData; times: number } },
-    )
-    return Object.values(countOccurrences)
-      .map(({ user, times }) => ({
-        user,
-        times: times.toString(),
-      }))
-      .sort((a, b) => parseInt(b.times) - parseInt(a.times))
-      .filter((_, i) => i < 10)
-  }, [data])
-  const columns: ColumnDef<OutputType>[] = useMemo(
+  const data = useSelector(get10MostComment)
+  const columns: ColumnDef<Most10CommentsOutputType>[] = useMemo(
     () => [
       {
         accessorKey: 'user',
         header: () => <div className='text-left'>Name</div>,
-        cell: ({ getValue }: CellContext<OutputType, unknown>) => {
+        cell: ({
+          getValue,
+        }: CellContext<Most10CommentsOutputType, unknown>) => {
           const val = getValue() as UserData
           return (
             <Link
@@ -82,7 +60,9 @@ export default function MostChat({
       {
         accessorKey: 'times',
         header: () => <div className='text-left'>Count</div>,
-        cell: ({ getValue }: CellContext<OutputType, unknown>) => {
+        cell: ({
+          getValue,
+        }: CellContext<Most10CommentsOutputType, unknown>) => {
           const val = getValue() as string
           return val
         },
@@ -90,17 +70,15 @@ export default function MostChat({
       {
         accessorKey: 'chat-detail',
         header: () => <div className='text-left'>View Detail</div>,
-        cell: ({ row }: CellContext<OutputType, unknown>) => {
+        cell: ({ row }: CellContext<Most10CommentsOutputType, unknown>) => {
           return <ShowListChat username={row.original.user.uniqueId} />
         },
       },
     ],
     [],
   )
-  const mostLikeArray = useMemo(() => getMostLikes(), [getMostLikes])
-
   const table = useReactTable({
-    data: mostLikeArray,
+    data: data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })

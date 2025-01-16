@@ -8,11 +8,12 @@ import BubblePerson from '../bubble-person'
 import BubbleTime from '../bubble-time'
 import { useSelector } from 'react-redux'
 import { LogData } from '@/lib/types/log'
-import { likes } from '@/components/selector/logs'
+import { getLimitedLikes, likes } from '@/components/selector/logs'
+import { RootState } from '@/store'
 
 export default function LikeList() {
   const [list, setList] = useState<LogData[]>([])
-  const logs = useSelector(likes)
+  const logs = useSelector(getLimitedLikes)
   const logsRef = useRef<LogData[]>(logs)
 
   useEffect(() => {

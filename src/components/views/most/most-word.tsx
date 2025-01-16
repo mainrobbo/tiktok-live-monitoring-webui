@@ -1,5 +1,4 @@
 'use query'
-import { AppContext } from '@/components/app-context'
 import {
   Dialog,
   DialogContent,
@@ -7,22 +6,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { LogsData } from '@/lib/types/common'
 import {
   CellContext,
   ColumnDef,
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useContext,
-  useMemo,
-} from 'react'
+import { Dispatch, SetStateAction, useMemo } from 'react'
 import { DataTable } from '../data-table'
 import ShowListChat from './show-list-chat'
+import { useSelector } from 'react-redux'
+import { get10MostWords } from '@/components/selector/logs'
 
 type OutputType = { word: string; users: string[]; times: string }
 
@@ -33,38 +27,8 @@ export default function MostWord({
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
-  const { comments: data }: { comments: LogsData[] } = useContext(AppContext)
-  const getMostWords = useCallback(() => {
-    const countOccurrences = data.reduce(
-      (acc, user) => {
-        const { comment, userId } = user.data
-        comment.split(' ').forEach((word: string) => {
-          const lowerCaseWord = word.toLowerCase()
-          if (acc[lowerCaseWord]) {
-            acc[lowerCaseWord].times += 1
-            if (!acc[lowerCaseWord].users.includes(userId))
-              acc[lowerCaseWord].users.push(userId)
-          } else {
-            acc[lowerCaseWord] = {
-              word: lowerCaseWord,
-              times: 1,
-              users: [userId],
-            }
-          }
-        })
-        return acc
-      },
-      {} as { [key: string]: { word: string; users: string[]; times: number } },
-    )
-    return Object.values(countOccurrences)
-      .map(({ word, times, users }) => ({
-        word,
-        users,
-        times: times.toString(),
-      }))
-      .sort((a, b) => parseInt(b.times) - parseInt(a.times))
-      .filter((_, i) => i < 10)
-  }, [data])
+  const mostWords = useSelector(get10MostWords)
+
   const columns: ColumnDef<OutputType>[] = useMemo(
     () => [
       {
@@ -101,9 +65,8 @@ export default function MostWord({
     ],
     [],
   )
-  const mostWordsArray = useMemo(() => getMostWords(), [data])
   const table = useReactTable({
-    data: mostWordsArray,
+    data: mostWords,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })

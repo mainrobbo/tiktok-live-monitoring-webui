@@ -112,13 +112,6 @@ export default function ExpandableChart() {
   const debounceLogs = useCallback(
     debounce(
       (newLogs: LogData[]) => {
-        console.log('Processing batch:', newLogs.length)
-        console.log(
-          'logs:',
-          logEntriesRef.current.length,
-          'processed:',
-          processedLogs.length,
-        )
         setProcessedLogs(newLogs)
         processingRef.current = false
         lastProcessedIndexRef.current = logEntriesRef.current.length
@@ -146,7 +139,6 @@ export default function ExpandableChart() {
   )
   useEffect(() => {
     if (logs?.length) {
-      console.log('New logs received:', logs.length)
       processLogsInBatch(logs)
     }
   }, [logs, processLogsInBatch])
@@ -233,6 +225,7 @@ export default function ExpandableChart() {
     )
   }, [processedLogs])
   const lastDate = useCallback(() => {
+    if (processedLogs.length === 0) return ''
     const last = processedLogs
       .map((log: LogData) => {
         const { createTime } = log
@@ -325,7 +318,9 @@ export default function ExpandableChart() {
             </span>
           </div>
         </CardHeader>
-        {/* <div className="px-5 py-2"> <MenuBarChart /></div> */}
+        <div className='px-5 py-2'>
+          <MenuBarChart />
+        </div>
       </div>
 
       <motion.div
@@ -579,7 +574,7 @@ export default function ExpandableChart() {
             )}
           </div>
           <span className='px-3 py-3  text-sm text-muted-foreground'>
-            Latest activity at {processedLogs.length > 0 && lastDate()}
+            Latest activity at {lastDate()}
           </span>
         </div>
       </CardFooter>

@@ -21,7 +21,7 @@ export default function ViewList() {
   const debouncedUpdateList = useRef(
     debounce(() => {
       setList([...logsRef.current])
-    }, 300),
+    }, 500),
   ).current
   useEffect(() => {
     debouncedUpdateList()

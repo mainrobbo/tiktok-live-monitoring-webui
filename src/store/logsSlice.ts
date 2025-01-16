@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { ActivityType } from '@/lib/types/common'
 import { LogData } from '@/lib/types/log'
 
-type LogsState = {
+export type LogsState = {
   [key in ActivityType]: LogData[]
 }
 
@@ -23,7 +23,7 @@ const logsSlice = createSlice({
   reducers: {
     addLogs(state, action: PayloadAction<LogData>) {
       const type = action.payload.log_type
-      state[type].push(action.payload)
+      state[type].unshift(action.payload)
     },
     cleanLogs: state => {
       Object.keys(state).forEach(key => {
