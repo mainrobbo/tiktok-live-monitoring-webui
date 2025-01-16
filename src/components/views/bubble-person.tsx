@@ -52,7 +52,11 @@ export default function BubblePerson({
   }
   const preferences = useSelector(({ preferences }: RootState) => preferences)
   return (
-    <div className='flex items-center gap-2 mt-0'>
+    <div
+      className={`flex items-center gap-2 mt-0 ${
+        isModerator && preferences.show_mod_badge ? 'bg-red-900' : ''
+      }`}
+    >
       {icon && <span>{icons[type]} </span>}
       <Popover>
         <PopoverTrigger asChild>
@@ -60,7 +64,6 @@ export default function BubblePerson({
             <div className='font-semibold truncate w-32'>
               {nickname ?? uniqueId}
             </div>
-            {isModerator && preferences.show_mod_badge && <span>🛠️</span>}
           </div>
         </PopoverTrigger>
         <PopoverContent className='w-80'>
@@ -96,11 +99,7 @@ export default function BubblePerson({
       )}
 
       {type == ActivityType.VIEW &&
-        (isRejoin ? (
-          <span>Rejoined the stream.</span>
-        ) : (
-          <span>Joined the stream.</span>
-        ))}
+        (isRejoin ? <span>Rejoined.</span> : <span>Joined.</span>)}
     </div>
   )
 }

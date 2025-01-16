@@ -7,6 +7,6 @@ export default function BubbleTime({ time }: { time: string }) {
   const preferences = useSelector(({ preferences }: RootState) => preferences)
   const formatted = preferences.show_relative_timestamp
     ? moment(moment.unix(Math.round(parseInt(time) / 1000))).fromNow()
-    : moment(moment.unix(Math.round(parseInt(time) / 1000))).format('hh:mm')
+    : moment(moment.unix(Math.round(parseInt(time) / 1000))).format('hh:mm:ss')
   return <div className='text-muted-foreground w-fit'>{formatted}</div>
 }

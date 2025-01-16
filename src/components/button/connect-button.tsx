@@ -69,17 +69,15 @@ export default function ConnectButton() {
       <Button
         size='sm'
         className={`w-full ${
-          showTransition ? 'bg-amber-500' : 'bg-emerald-500'
+          state == 'connecting'
+            ? 'bg-amber-500'
+            : 'bg-emerald-500 hover:bg-emerald-400'
         }`}
-        disabled={
-          !username || state.toString() === 'connecting' || live || !wsUrl
-        }
+        disabled={!username || state === 'connecting' || live || !wsUrl}
         onClick={handleConnectButton}
       >
         {state === 'connecting' ? (
           <RefreshCwIcon className='animate-spin' />
-        ) : showTransition ? (
-          <RefreshCwIcon className='animate-spin duration-300' />
         ) : (
           'Start'
         )}

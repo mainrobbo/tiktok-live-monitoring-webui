@@ -42,13 +42,13 @@ export default function LikeList() {
           <AnimatePresence>
             {list.map(({ data }) => (
               <motion.div
-                initial={{ opacity: 0, x: -150 }}
+                initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 100, x: 0 }}
                 transition={{
                   type: 'spring',
                   stiffness: 260,
                   damping: 20,
-                  delay: 0.3,
+                  delay: 0.1,
                 }}
                 key={data.msgId}
                 className='chat-bubble-container'

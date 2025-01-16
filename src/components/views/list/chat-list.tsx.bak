@@ -10,15 +10,20 @@ import { useSelector } from 'react-redux'
 import { getLimitedComments } from '@/components/selector/logs'
 import { LogEntry } from '@/store/logsSlice'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { RootState } from '@/store'
 
 export default function ChatList() {
   const [list, setList] = useState<LogEntry[]>([])
-  const logs = useSelector((state: RootState) => getLimitedComments(state))
+  const [limit, setLimit] = useState(20)
+  const logs = useSelector((state: RootState) =>
+    getLimitedComments(state, limit),
+  )
   const chatsRef = useRef<LogEntry[]>(logs)
 
   useEffect(() => {
     chatsRef.current = logs
+    console.log('incomming logs', logs.length)
   }, [logs])
   const debouncedUpdateList = useRef(
     debounce(
@@ -33,38 +38,36 @@ export default function ChatList() {
     debouncedUpdateList() // Call debounced function
     return () => debouncedUpdateList.cancel() // Clean up on unmount
   }, [logs])
+
+  // Virtualizer
+  const parentRef = useRef<HTMLDivElement>(null)
+  const rowVirtualizer = useVirtualizer({
+    count: list.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 50,
+    overscan: 10, // Render a few items beyond the visible area
+  })
+
+  const handleScroll = () => {
+    const scrollElement = parentRef.current
+    if (scrollElement) {
+      const scrollOffset = scrollElement.scrollTop + scrollElement.clientHeight
+      const scrollHeight = scrollElement.scrollHeight
+      const bottomReached = scrollOffset >= scrollHeight - 20 // 100px from the bottom
+      console.log('hei', { bottomReached })
+
+      if (bottomReached && list.length < logs.length) {
+        setLimit(prevLimit => prevLimit + 40) // Increase the limit by 100 more items
+      }
+    }
+  }
   return (
     <Card className='text-sm'>
       <CardHeader>
         <CardTitle>Chats</CardTitle>
       </CardHeader>
       <Separator />
-      <CardContent>
-        <ScrollArea className='h-[250px] rounded-md py-2 flex flex-col gap-2 w-full mt-2'>
-          <AnimatePresence>
-            {list.map(({ data }, index) => (
-              <motion.div
-                initial={{ opacity: 0, x: -150 }}
-                animate={{ opacity: 100, x: 0 }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 260,
-                  damping: 20,
-                  delay: 0.1 * index,
-                }}
-                key={data.msgId}
-                className='chat-bubble-container'
-              >
-                <BubbleTime time={data.createTime} />
-                <div className='flex flex-col'>
-                  <BubblePerson logsData={data} />
-                  <div className='text-left'>{data.comment}</div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </ScrollArea>
-      </CardContent>
+      <CardContent></CardContent>
     </Card>
   )
 }

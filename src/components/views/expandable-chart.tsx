@@ -114,8 +114,8 @@ export default function ExpandableChart() {
         processingRef.current = false
         lastProcessedIndexRef.current = logEntriesRef.current.length
       },
-      3000,
-      { maxWait: 5000 },
+      1000,
+      { maxWait: 2000 },
     ),
     [],
   )

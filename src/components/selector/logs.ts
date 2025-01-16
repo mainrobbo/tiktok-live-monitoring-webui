@@ -3,11 +3,11 @@ import { ActivityType } from '@/lib/types/common'
 import { RootState } from '@/store'
 import { LogEntry } from '@/store/logsSlice'
 import { createSelector } from '@reduxjs/toolkit'
-const LIMIT = 25
-const getLimited = (log: LogEntry[]) =>
+const DEFAULT_LIMIT = 50
+const getLimited = (log: LogEntry[], limit = DEFAULT_LIMIT) =>
   log
     .sort((a, b) => parseInt(b.data.createTime) - parseInt(a.data.createTime))
-    .slice(0, LIMIT)
+    .slice(0, limit)
 export const comments = ({ logs }: RootState) => logs[ActivityType.COMMENT]
 export const views = ({ logs }: RootState) => logs[ActivityType.VIEW]
 export const share = ({ logs }: RootState) => logs[ActivityType.SHARE]
@@ -19,8 +19,11 @@ export const likes = ({ logs }: RootState) => logs[ActivityType.LIKE]
 export const getLimitedLikes = createSelector([likes], likes =>
   getLimited(Array.from(likes.values())),
 )
-export const getLimitedComments = createSelector([comments], comments =>
-  getLimited(Array.from(comments.values())),
+export const getLimitedComments = createSelector(
+  (state: RootState) => state,
+  (state: RootState, limit = DEFAULT_LIMIT) => limit,
+  (state: RootState, limit = DEFAULT_LIMIT) =>
+    getLimited(Array.from(state.logs[ActivityType.COMMENT].values()), limit),
 )
 export const getLimitedViews = createSelector([views], views =>
   getLimited(Array.from(views.values())),

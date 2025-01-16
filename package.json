@@ -31,6 +31,7 @@
     "@studio-freight/lenis": "^1.0.42",
     "@studio-freight/react-lenis": "^0.0.47",
     "@tanstack/react-table": "^8.20.6",
+    "@tanstack/react-virtual": "^3.11.2",
     "@types/lodash": "^4.17.14",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

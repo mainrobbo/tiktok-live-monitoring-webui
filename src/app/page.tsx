@@ -8,7 +8,7 @@ import RoomInfoComponent from '@/components/views/room-info'
 export default function Home() {
   return (
     <div className='grid grid-cols-1 lg:grid-cols-3 gap-2 w-full justify-items-stretch justify-align-start h-full p-2'>
-      <RoomInfoComponent />
+      {/* <RoomInfoComponent />*/}
 
       <div className='w-full lg:col-span-3'>
         <ExpandableChart />

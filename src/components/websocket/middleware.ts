@@ -51,8 +51,8 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           toast.success('Connected to server', {
             position: 'bottom-right',
           })
-          localStorage.setItem('ZERATIKTOK:username', username)
           // Only save if connection made successfully
+          localStorage.setItem('ZERATIKTOK:username', username)
           localStorage.setItem('ZERATIKTOK:wsUrl', wsUrl)
         })
         socket.on('disconnect', () => {
@@ -74,9 +74,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
         socket.on('data-connection', data => {
           try {
             data = JSON.parse(data)
-            if (data?.message) {
-              toast.warning(data.message)
-            }
+
             dispatch(setLive(data.isConnected))
 
             // Handle if connection backend-to-tiktok
@@ -85,18 +83,22 @@ const websocketMiddleware: Middleware<{}, any> = store => {
               toast.success('Connected to tiktok')
             } else {
               dispatch(setState('idle'))
-              toast.warning('Disconnected from tiktok', {
-                action: {
-                  label: 'Reconnect',
-                  onClick: () => {
-                    dispatch(setState('connecting'))
-                    socket?.emit(
-                      'listenToUsername',
-                      JSON.stringify({ username }),
-                    )
+              if (data?.message) {
+                toast.warning(data.message)
+              } else {
+                toast.warning('Disconnected from tiktok', {
+                  action: {
+                    label: 'Reconnect',
+                    onClick: () => {
+                      dispatch(setState('connecting'))
+                      socket?.emit(
+                        'listenToUsername',
+                        JSON.stringify({ username }),
+                      )
+                    },
                   },
-                },
-              })
+                })
+              }
             }
           } catch (err) {
             console.log('data-connection', err)
