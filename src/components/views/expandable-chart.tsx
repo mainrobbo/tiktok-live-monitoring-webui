@@ -470,7 +470,7 @@ export default function ExpandableChart() {
                           cursor={false}
                           content={<ChartTooltipContent indicator='dot' />}
                         />
-                        {(activeChart.includes('view') ||
+                        {((isExpanded && activeChart.includes('view')) ||
                           activeChart == undefined) && (
                           <Area
                             dataKey='view'
@@ -480,7 +480,7 @@ export default function ExpandableChart() {
                             stackId='a'
                           />
                         )}
-                        {(activeChart.includes('like') ||
+                        {((isExpanded && activeChart.includes('like')) ||
                           activeChart == undefined) && (
                           <Area
                             dataKey='like'
@@ -490,7 +490,7 @@ export default function ExpandableChart() {
                             stackId='a'
                           />
                         )}
-                        {(activeChart.includes('comment') ||
+                        {((isExpanded && activeChart.includes('comment')) ||
                           activeChart == undefined) && (
                           <Area
                             dataKey='comment'
@@ -500,7 +500,7 @@ export default function ExpandableChart() {
                             stackId='a'
                           />
                         )}
-                        {(activeChart.includes('gift') ||
+                        {((isExpanded && activeChart.includes('gift')) ||
                           activeChart == undefined) && (
                           <Area
                             dataKey='gift'
@@ -510,7 +510,7 @@ export default function ExpandableChart() {
                             stackId='a'
                           />
                         )}
-                        {(activeChart.includes('share') ||
+                        {((isExpanded && activeChart.includes('share')) ||
                           activeChart == undefined) && (
                           <Area
                             dataKey='share'
@@ -520,7 +520,7 @@ export default function ExpandableChart() {
                             stackId='a'
                           />
                         )}
-                        {(activeChart.includes('social') ||
+                        {((isExpanded && activeChart.includes('social')) ||
                           activeChart == undefined) && (
                           <Area
                             dataKey='social'

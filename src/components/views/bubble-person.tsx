@@ -61,7 +61,7 @@ export default function BubblePerson({
       <Popover>
         <PopoverTrigger asChild>
           <div className='hover:underline hover:cursor-pointer w-fit'>
-            <div className='font-semibold truncate w-32'>
+            <div className='font-semibold truncate w-full'>
               {nickname ?? uniqueId}
             </div>
           </div>

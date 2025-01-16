@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       boxShadow: {
-        innerCustom: 'inset 1px 10px 35px -20px rgba(0,0,0,0.2)', // Customize this as needed
+        innerCustom: 'inset 1px 10px 35px -20px rgba(0,0,0,0.1)', // Customize this as needed
       },
       colors: {
         background: 'hsl(var(--background))',
