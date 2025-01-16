@@ -31,7 +31,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useExpandable } from '@/hooks/use-expandable'
-import _ from 'lodash'
+import { debounce } from 'lodash'
 import moment from 'moment'
 import { ActivityType } from '@/lib/types/common'
 import {
@@ -104,16 +104,14 @@ export default function ExpandableChart() {
   ])
   const logs = useSelector(getAllLogs)
   const [debouncedLogs, setDebouncedLogs] = useState(logs)
-  const debouncedSetLogs = useCallback(
-    _.debounce(l => {
-      console.log('Debounced logs update:', l)
+  const debouncedSetLogsRef = useRef(
+    debounce(l => {
       setDebouncedLogs(l)
-    }, 300),
-    [logs],
+    }, 1000),
   )
 
   useEffect(() => {
-    debouncedSetLogs(logs)
+    debouncedSetLogsRef.current(logs)
   }, [logs])
   const transformedData = useCallback(() => {
     const countOccurrences = debouncedLogs.reduce(
@@ -204,7 +202,7 @@ export default function ExpandableChart() {
   const transformedDataArray = useMemo(
     () => transformedData(),
     [transformedData],
-  ) // Only depend on transformedData
+  )
   const total = useMemo(
     () => ({
       like: transformedDataArray.reduce(
@@ -496,34 +494,39 @@ export default function ExpandableChart() {
       </motion.div>
       <CardFooter className='p-0 w-full'>
         <div className='flex flex-col w-full'>
-          {/* <div className={`grid grid-cols-2 lg:flex justify-items-stretch w-full border-b ${isExpanded ? `border-t` : `border-t-0`}`}>
-                        {["view", "like", "comment", "gift", "share", "social"].map((key, i) => {
-                            const chart = key as keyof typeof chartConfig
-                            return (
-                                <button
-                                    disabled={!isExpanded}
-                                    key={chart}
-                                    data-active={activeChart.includes(chart)}
-                                    className="w-full flex flex-1 flex-col items-center justify-center gap-1 border-t px-0 lg:px-6 py-3 lg:py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
-                                    onClick={() => removeActiveChart(key)}
-                                >
-                                    <span className="text-xs text-muted-foreground">
-                                        {chartConfig[chart].label}
-                                    </span>
-                                    <span className="text-lg font-bold leading-none sm:text-3xl">
-                                        <NumberFlow
-                                            value={total[key as keyof typeof total]}
-                                            transformTiming={{
-                                                duration: 500,
-                                                easing: "ease-out",
-                                            }}
-                                        />
-
-                                    </span>
-                                </button>
-                            )
-                        })}
-                    </div> */}
+          <div
+            className={`grid grid-cols-2 lg:flex justify-items-stretch w-full border-b ${
+              isExpanded ? `border-t` : `border-t-0`
+            }`}
+          >
+            {['view', 'like', 'comment', 'gift', 'share', 'social'].map(
+              (key, i) => {
+                const chart = key as keyof typeof chartConfig
+                return (
+                  <button
+                    disabled={!isExpanded}
+                    key={chart}
+                    data-active={activeChart.includes(chart)}
+                    className='w-full flex flex-1 flex-col items-center justify-center gap-1 border-t px-0 lg:px-6 py-3 lg:py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6'
+                    onClick={() => removeActiveChart(key)}
+                  >
+                    <span className='text-xs text-muted-foreground'>
+                      {chartConfig[chart].label}
+                    </span>
+                    <span className='text-lg font-bold leading-none sm:text-3xl'>
+                      <NumberFlow
+                        value={total[key as keyof typeof total]}
+                        transformTiming={{
+                          duration: 500,
+                          easing: 'ease-out',
+                        }}
+                      />
+                    </span>
+                  </button>
+                )
+              },
+            )}
+          </div>
           <span className='px-3 py-3  text-sm text-muted-foreground'>
             Latest activity at {debouncedLogs.length > 0 && lastDate()}
           </span>
