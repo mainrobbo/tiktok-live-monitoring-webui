@@ -52,12 +52,14 @@ export default function BubblePerson({
   }
   const preferences = useSelector(({ preferences }: RootState) => preferences)
   return (
-    <div className='flex items-center gap-2 '>
+    <div className='flex items-center gap-2 mt-0'>
       {icon && <span>{icons[type]} </span>}
       <Popover>
         <PopoverTrigger asChild>
-          <div className='hover:underline hover:cursor-pointer'>
-            <span className='font-semibold'>{nickname ?? uniqueId}</span>
+          <div className='hover:underline hover:cursor-pointer w-fit'>
+            <div className='font-semibold truncate w-32'>
+              {nickname ?? uniqueId}
+            </div>
             {isModerator && preferences.show_mod_badge && <span>🛠️</span>}
           </div>
         </PopoverTrigger>
