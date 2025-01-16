@@ -94,10 +94,19 @@ export default function VideoPlayer({ src }: { src: string }) {
         'This is an old browser that does not support MSE https://developer.mozilla.org/en-US/docs/Web/API/Media_Source_Extensions_API',
       )
     }
+    // video.onloadedmetadata = function () {
+    //   if (document.pictureInPictureEnabled && !video.disablePictureInPicture) {
+    //     try {
+    //       if (document.pictureInPictureElement) {
+    //         document.exitPictureInPicture()
+    //       }
+    //       video.requestPictureInPicture()
+    //     } catch (err) {
+    //       console.error(err)
+    //     }
+    //   }
+    // }
   }, [computedSrc, videoRef])
-  const cek = () => {
-    console.log(hlsLocal)
-  }
   const primaryColor = 'white'
   const chromeStyles = {
     '--media-icon-color': primaryColor,
@@ -148,32 +157,33 @@ export default function VideoPlayer({ src }: { src: string }) {
           </MediaControlBar>
         </MediaController>
       </div>
-      <Button onClick={cek}>check</Button>
-      <div className='flex items-center gap-2'>
-        <Select value={proxyStreamUrl} onValueChange={setProxyStreamUrl}>
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder='Media Server Proxy' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='-1'>-- No proxy --</SelectItem>
-            {MEDIA_SERVER.map((server, index) => (
-              <SelectItem key={index} value={server}>
-                Server {index + 1}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <HoverCard>
-          <HoverCardTrigger asChild>
-            <InfoIcon className='opacity-50' size={18} />
-          </HoverCardTrigger>
-          <HoverCardContent className='w-80'>
-            <div className='flex justify-between space-x-4'>
-              Use or change proxy if the media streaming not working!
-            </div>
-          </HoverCardContent>
-        </HoverCard>
-      </div>
+      {!src.includes('flv') && (
+        <div className='flex items-center gap-2'>
+          <Select value={proxyStreamUrl} onValueChange={setProxyStreamUrl}>
+            <SelectTrigger className='w-[180px]'>
+              <SelectValue placeholder='Media Server Proxy' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='-1'>-- No proxy --</SelectItem>
+              {MEDIA_SERVER.map((server, index) => (
+                <SelectItem key={index} value={server}>
+                  Server {index + 1}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <InfoIcon className='opacity-50' size={18} />
+            </HoverCardTrigger>
+            <HoverCardContent className='w-80'>
+              <div className='flex justify-between space-x-4'>
+                Use or change proxy if the media streaming not working!
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        </div>
+      )}
     </div>
   )
 }
