@@ -13,7 +13,7 @@ interface Connection {
 const initialState: Connection = {
   connected: false,
   live: false,
-  wsUrl: '',
+  wsUrl: 'wss://server-tt.zeranel.dev',
   proxyUrl: '127.0.0.1:8080',
   proxyTimeout: 10000,
   state: 'idle',
