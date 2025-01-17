@@ -1,4 +1,5 @@
 'use client'
+import { isLogsExist } from '@/components/selector/logs'
 import ExpandableChart from '@/components/views/expandable-chart'
 import LandingPage from '@/components/views/landing'
 import ChatList from '@/components/views/list/chat-list'
@@ -12,9 +13,10 @@ import { useSelector } from 'react-redux'
 
 export default function Home() {
   const { live, connected } = useSelector((state: any) => state.connection)
+  const logs = useSelector(isLogsExist)
   return (
     <div className='grid grid-cols-1 lg:grid-cols-3 gap-2 w-full justify-items-stretch justify-align-start h-fit p-2'>
-      {live && connected ? (
+      {(live && connected) || logs ? (
         <>
           <RoomInfoComponent />
           <div className='w-full lg:col-span-3'>
