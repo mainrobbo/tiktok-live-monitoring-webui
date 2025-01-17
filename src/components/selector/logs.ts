@@ -72,15 +72,13 @@ export const isLogsExist = createSelector(
   [gift, follow, comments, likes, views, share, subscribe],
   (gift, follow, comments, likes, views, share, subscribe) => {
     return (
-      [
-        ...Array.from(gift.values()),
-        ...Array.from(follow.values()),
-        ...Array.from(comments.values()),
-        ...Array.from(likes.values()),
-        ...Array.from(views.values()),
-        ...Array.from(share.values()),
-        ...Array.from(subscribe.values()),
-      ].length > 0
+      gift.size > 0 ||
+      follow.size > 0 ||
+      comments.size > 0 ||
+      likes.size > 0 ||
+      views.size > 0 ||
+      share.size > 0 ||
+      subscribe.size > 0
     )
   },
 )
@@ -123,23 +121,25 @@ export const getGiftByGiftName = createSelector(
   (state: RootState, giftName: string) => {
     if (!giftName) return []
     return Object.values(
-      Array.from(state.logs.gift.values()).reduce((arr, { data }) => {
-        const { uniqueId, repeatCount, diamondCount } = data
-        if (!arr[uniqueId]) {
-          arr[uniqueId] = {
-            repeatCount: repeatCount,
-            diamondCount: diamondCount,
-            user: {
-              uniqueId: data.uniqueId,
-              userId: data.userId,
-              nickname: data.nickname,
-              profilePictureUrl: data.profilePictureUrl,
-            },
+      Array.from(state.logs.gift.values())
+        .filter(a => a.data.giftName == giftName)
+        .reduce((arr, { data }) => {
+          const { uniqueId, repeatCount, diamondCount } = data
+          if (!arr[uniqueId]) {
+            arr[uniqueId] = {
+              repeatCount: repeatCount,
+              diamondCount: diamondCount,
+              user: {
+                uniqueId: data.uniqueId,
+                userId: data.userId,
+                nickname: data.nickname,
+                profilePictureUrl: data.profilePictureUrl,
+              },
+            }
           }
-        }
-        arr[uniqueId].repeatCount += repeatCount
-        return arr
-      }, {} as { [key: string]: { user: UserData; repeatCount: number; diamondCount: number } }),
+          arr[uniqueId].repeatCount += repeatCount
+          return arr
+        }, {} as { [key: string]: { user: UserData; repeatCount: number; diamondCount: number } }),
     )
       .map(({ user, repeatCount, diamondCount }) => ({
         diamondCount,
