@@ -23,14 +23,13 @@ const websocketMiddleware: Middleware<{}, any> = store => {
   return next => (action: any) => {
     const state = store.getState() as RootState
     const { dispatch } = store
-    const username = state.setting.username
-    const wsUrl = state.connection.wsUrl
     const isRejoin = (userId: string): boolean => {
       return viewUserIds.has(userId)
     }
-
     switch (action.type) {
       case SocketActionType.START:
+        const { wsUrl, username } = action.payload
+        console.log('retrieving socket', wsUrl, username)
         dispatch(setState('connecting'))
         localStorage.setItem('ZERATIKTOK:username', username)
         /** Clean before start */
