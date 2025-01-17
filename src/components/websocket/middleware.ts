@@ -32,6 +32,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
     switch (action.type) {
       case SocketActionType.START:
         dispatch(setState('connecting'))
+        localStorage.setItem('ZERATIKTOK:username', username)
         /** Clean before start */
         if (previousUsername != username) {
           dispatch(cleanLogs())
@@ -48,6 +49,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
             reconnection: true,
             autoConnect: true,
           })
+          localStorage.setItem('ZERATIKTOK:wsUrl', wsUrl)
         }
         socket.emit('listenToUsername', JSON.stringify({ username }))
         previousUsername = username
@@ -56,10 +58,6 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           toast.success('Connected to server', {
             position: 'bottom-right',
           })
-          // Only save if connection made successfully
-          localStorage.setItem('ZERATIKTOK:username', username)
-
-          localStorage.setItem('ZERATIKTOK:wsUrl', wsUrl)
         })
         socket.on('disconnect', () => {
           // Only if disconnected from server.
