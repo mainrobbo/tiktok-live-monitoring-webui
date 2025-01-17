@@ -12,7 +12,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { DataTable } from '../data-table'
 import { Button } from '@/components/ui/button'
 import { DialogTrigger } from '@radix-ui/react-dialog'
@@ -35,9 +35,8 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import moment from 'moment'
-import { LogData } from '@/lib/types/log'
 import { useSelector } from 'react-redux'
-import { get10MostWords, getMostWordByFilter } from '@/components/selector/logs'
+import { getMostWordByFilter } from '@/components/selector/logs'
 import { RootState } from '@/store'
 import { removeDuplicates } from '@/lib/helper/transform'
 type UserData = {
@@ -74,7 +73,7 @@ export default function ShowListChat({
   }
 
   const mostWords = useSelector((state: RootState) =>
-    getMostWordByFilter(state, '', word),
+    getMostWordByFilter(state, username, word),
   )
   const filteredMostWords = useMemo(() => {
     return mostWords.filter(

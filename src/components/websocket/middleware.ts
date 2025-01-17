@@ -170,7 +170,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
                 {
                   ...data,
                   log_type: type,
-                  isStreak: data.giftType === 1,
+                  isStreak: data.giftType === 1 && !data.repeatEnd,
                   currentViewers,
                 },
                 batcher,

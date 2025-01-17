@@ -14,17 +14,8 @@ import {
 } from '@tanstack/react-table'
 import { Dispatch, SetStateAction, useMemo } from 'react'
 import { DataTable } from '../data-table'
-import Link from 'next/link'
-import ShowListChat from './show-list-chat'
-import { ArrowRightSquare } from 'lucide-react'
-import ShowListLike from './show-list-like'
 import { useSelector } from 'react-redux'
-import {
-  get10MostActivity,
-  get10MostGift,
-  Most10ActivityOutputType,
-  Most10GiftType,
-} from '@/components/selector/logs'
+import { get10MostGift, Most10GiftType } from '@/components/selector/logs'
 import ShowListGift from './show-list-gift'
 
 export default function MostGift({

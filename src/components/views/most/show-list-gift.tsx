@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { useSelector } from 'react-redux'
-import { getMostGiftByFilter } from '@/components/selector/logs'
+import { getGiftByGiftName } from '@/components/selector/logs'
 import { RootState } from '@/store'
 import { removeDuplicates } from '@/lib/helper/transform'
 type UserData = {
@@ -72,7 +72,7 @@ export default function ShowListGift({
   }
 
   const mostWords = useSelector((state: RootState) =>
-    getMostGiftByFilter(state, giftName),
+    getGiftByGiftName(state, giftName),
   )
   const filteredData = useMemo(() => {
     return mostWords.filter(d => d.user.uniqueId.includes(selectedUsername))

@@ -16,6 +16,7 @@ import MostWord from './most/most-word'
 import MostActivity from './most/most-activity'
 import { BookIcon } from 'lucide-react'
 import MostGift from './most/most-gift'
+import MostGifter from './most/most-gifter'
 
 export default function MenuBarChart() {
   const [topMostLikes, setTopMostLikes] = useState(false)
@@ -23,6 +24,7 @@ export default function MenuBarChart() {
   const [mostWords, setMostWords] = useState(false)
   const [mostActivity, setMostActivity] = useState(false)
   const [mostGift, setMostGift] = useState(false)
+  const [topMostGifter, setTopMostGifter] = useState(false)
   return (
     <>
       <Menubar className='mt-2 w-fit'>
@@ -57,7 +59,9 @@ export default function MenuBarChart() {
                   Most Gift
                 </MenubarItem>
                 <MenubarItem disabled>Top Gift</MenubarItem>
-                <MenubarItem disabled>Top & Most Giver</MenubarItem>
+                <MenubarItem onClick={() => setTopMostGifter(true)}>
+                  Top & Most Giver
+                </MenubarItem>
               </MenubarSubContent>
             </MenubarSub>
             <MenubarSub>
@@ -76,6 +80,7 @@ export default function MenuBarChart() {
         <MostWord open={mostWords} setOpen={setMostWords} />
         <MostActivity open={mostActivity} setOpen={setMostActivity} />
         <MostGift open={mostGift} setOpen={setMostGift} />
+        <MostGifter open={topMostGifter} setOpen={setTopMostGifter} />
       </Menubar>
     </>
   )

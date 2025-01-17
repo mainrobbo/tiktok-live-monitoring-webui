@@ -117,7 +117,7 @@ export const getMostWordByFilter = createSelector(
       .slice(0, 10)
   },
 )
-export const getMostGiftByFilter = createSelector(
+export const getGiftByGiftName = createSelector(
   (state: RootState) => state,
   (state: RootState, giftName: string) => giftName,
   (state: RootState, giftName: string) => {
@@ -336,6 +336,8 @@ export const get10MostGift = createSelector([gift], gift => {
           diamondCount,
           uniqueId,
           giftPictureUrl,
+          giftType,
+          repeatEnd,
         } = data
         if (!acc[giftName]) {
           acc[giftName] = {
@@ -346,11 +348,13 @@ export const get10MostGift = createSelector([gift], gift => {
             giftPictureUrl: '',
           }
         }
-        acc[giftName].diamondTotal += diamondCount * repeatCount
-        acc[giftName].repeatTotal += repeatCount
-        acc[giftName].giftPictureUrl = giftPictureUrl
-        if (!acc[giftName].users.some(user => user === uniqueId)) {
-          acc[giftName].users.push(uniqueId)
+        if (!(giftType == 1 && !repeatEnd)) {
+          acc[giftName].diamondTotal += diamondCount * repeatCount
+          acc[giftName].repeatTotal += repeatCount
+          acc[giftName].giftPictureUrl = giftPictureUrl
+          if (!acc[giftName].users.some(user => user === uniqueId)) {
+            acc[giftName].users.push(uniqueId)
+          }
         }
         return acc
       }, {} as { [key: string]: { giftName: string; diamondTotal: number; repeatTotal: number; users: UserData['uniqueId'][]; giftPictureUrl: string } }),
@@ -364,5 +368,53 @@ export const get10MostGift = createSelector([gift], gift => {
       giftPictureUrl,
     }))
     .sort((a, b) => b.diamondTotal - a.diamondTotal)
+    .filter((_, i) => i < 10)
+})
+
+export type Most10GifterType = {
+  totalStreak: number
+  totalGift: number
+  totalDiamond: number
+  user: UserData
+}
+export const get10MostGifter = createSelector([gift], gift => {
+  return (
+    Object.values(
+      Array.from(gift.values()).reduce((acc, { data }) => {
+        const {
+          repeatCount,
+          giftName,
+          diamondCount,
+          uniqueId,
+          giftPictureUrl,
+          isStreak,
+          repeatEnd,
+          giftType,
+        } = data
+        if (!acc[uniqueId]) {
+          acc[uniqueId] = {
+            totalGift: 0,
+            totalStreak: 0,
+            totalDiamond: 0,
+            user: data,
+          }
+        }
+        if (!(giftType == 1 && !repeatEnd)) {
+          // Non streak or on streak-end gift
+          if (!isStreak) acc[uniqueId].totalStreak++
+          acc[uniqueId].totalGift += repeatCount
+          acc[uniqueId].totalDiamond += diamondCount * repeatCount
+        }
+        return acc
+      }, {} as { [key: string]: { totalDiamond: number; totalStreak: number; totalGift: number; user: UserData } }),
+    ) as Most10GifterType[]
+  )
+    .map(({ totalDiamond, totalStreak, totalGift, user }) => ({
+      totalDiamond,
+      totalStreak,
+      totalGift,
+      user,
+    }))
+    .sort((a, b) => b.totalDiamond - a.totalDiamond)
     .filter((_, i) => i < 10)
 })
