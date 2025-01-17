@@ -29,7 +29,6 @@ const websocketMiddleware: Middleware<{}, any> = store => {
     switch (action.type) {
       case SocketActionType.START:
         const { wsUrl, username } = action.payload
-        console.log('retrieving socket', wsUrl, username)
         dispatch(setState('connecting'))
         localStorage.setItem('ZERATIKTOK:username', username)
         /** Clean before start */
