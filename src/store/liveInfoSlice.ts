@@ -6,6 +6,7 @@ const initialState: TiktokLiveState = {
   liveIntro: undefined,
   linkMicBattle: undefined,
   linkMicArmies: undefined,
+  viewers: 0,
 }
 
 const liveInfo = createSlice({
@@ -30,9 +31,17 @@ const liveInfo = createSlice({
     ) => {
       state.linkMicArmies = action.payload
     },
+    setViewers: (state, action: PayloadAction<number>) => {
+      state.viewers = action.payload
+    },
   },
 })
 
-export const { setRoomInfo, setLiveIntro, setMicArmies, setMicBattle } =
-  liveInfo.actions
+export const {
+  setRoomInfo,
+  setLiveIntro,
+  setMicArmies,
+  setMicBattle,
+  setViewers,
+} = liveInfo.actions
 export default liveInfo.reducer

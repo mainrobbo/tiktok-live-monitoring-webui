@@ -56,4 +56,5 @@ export interface TiktokLiveState {
   liveIntro?: liveIntro
   linkMicBattle?: MicBattle
   linkMicArmies?: MicArmies
+  viewers: number
 }

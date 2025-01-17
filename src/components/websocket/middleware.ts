@@ -4,7 +4,12 @@ import io, { Socket } from 'socket.io-client'
 import { setState, setConnected, setLive } from '@/store/connectionSlice'
 import { toast } from 'sonner'
 import { CommentLog } from '@/lib/types/log'
-import { setLiveIntro, setMicBattle, setRoomInfo } from '@/store/liveInfoSlice'
+import {
+  setLiveIntro,
+  setMicBattle,
+  setRoomInfo,
+  setViewers,
+} from '@/store/liveInfoSlice'
 import { RootState } from '@/store'
 import { beforeAddLog, createBatcher } from '@/lib/helper/data-handle'
 import { cleanLogs } from '@/store/logsSlice'
@@ -19,7 +24,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
     const { dispatch } = store
     const username = state.setting.username
     const wsUrl = state.connection.wsUrl
-
+    const { viewers: currentViewers } = state.liveInfo
     const isRejoin = (userId: string): boolean => {
       return viewUserIds.has(userId)
     }
@@ -53,6 +58,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           })
           // Only save if connection made successfully
           localStorage.setItem('ZERATIKTOK:username', username)
+
           localStorage.setItem('ZERATIKTOK:wsUrl', wsUrl)
         })
         socket.on('disconnect', () => {
@@ -122,13 +128,22 @@ const websocketMiddleware: Middleware<{}, any> = store => {
             console.error('data-roomInfo', data, err)
           }
         })
+        socket.on('data-viewer', data => {
+          try {
+            data = JSON.parse(data)
+            dispatch(setViewers(data.viewerCount))
+          } catch (err) {
+            console.error('data-roomInfo', data, err)
+          }
+        })
+
         //* Listening data
         socket.on('data-chat', data => {
           try {
             data = JSON.parse(data) as CommentLog
             if (data.comment) {
               const type = ActivityType.COMMENT
-              beforeAddLog({ ...data, log_type: type }, batcher)
+              beforeAddLog({ ...data, log_type: type, currentViewers }, batcher)
             }
             //TODO if (isNotifySound && showComment) SoundNotify({ type: "comment" });
           } catch (err) {
@@ -140,7 +155,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
             data = JSON.parse(data)
             if (data.likeCount) {
               const type = ActivityType.LIKE
-              beforeAddLog({ ...data, log_type: type }, batcher)
+              beforeAddLog({ ...data, log_type: type, currentViewers }, batcher)
             }
           } catch (err) {
             console.error('data-like', err)
@@ -156,6 +171,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
                   ...data,
                   log_type: type,
                   isStreak: data.giftType === 1,
+                  currentViewers,
                 },
                 batcher,
               )
@@ -168,7 +184,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           try {
             data = JSON.parse(data)
             const type = ActivityType.SHARE
-            beforeAddLog({ ...data, log_type: type }, batcher)
+            beforeAddLog({ ...data, log_type: type, currentViewers }, batcher)
           } catch (err) {
             console.error('data-share', err)
           }
@@ -177,7 +193,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           try {
             data = JSON.parse(data)
             const type = ActivityType.SOCIAL
-            beforeAddLog({ ...data, log_type: type }, batcher)
+            beforeAddLog({ ...data, log_type: type, currentViewers }, batcher)
           } catch (err) {
             console.error('data-social', err)
           }
@@ -191,7 +207,12 @@ const websocketMiddleware: Middleware<{}, any> = store => {
 
             const type = ActivityType.VIEW
             beforeAddLog(
-              { ...data, log_type: type, isRejoin: isUserRejoin },
+              {
+                ...data,
+                log_type: type,
+                isRejoin: isUserRejoin,
+                currentViewers,
+              },
               batcher,
             )
           } catch (err) {
@@ -202,7 +223,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           try {
             data = JSON.parse(data)
             const type = ActivityType.SUBSCRIBE
-            beforeAddLog({ ...data, log_type: type }, batcher)
+            beforeAddLog({ ...data, log_type: type, currentViewers }, batcher)
           } catch (err) {
             console.error('data-subscribe', err)
           }
@@ -221,7 +242,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           try {
             data = JSON.parse(data)
             const type = ActivityType.SUBSCRIBE
-            beforeAddLog({ ...data, log_type: type }, batcher)
+            beforeAddLog({ ...data, log_type: type, currentViewers }, batcher)
           } catch (err) {
             console.error('data-micArmies', err)
           }
