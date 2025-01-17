@@ -113,7 +113,7 @@ export default function ChatOverlay() {
       ) as Message[]
   }, [list])
   return (
-    <Suspense>
+    <Suspense fallback={<>Loading...</>}>
       live && (
       <MessagesList
         formatTimestamp={formatTimestamp}
