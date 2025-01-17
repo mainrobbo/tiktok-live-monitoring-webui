@@ -25,7 +25,6 @@ export default function MostGifter({
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
   const mostActivity = useSelector(get10MostGifter)
-  console.log({ mostActivity })
   const columns: ColumnDef<Most10GifterType>[] = useMemo(
     () => [
       {

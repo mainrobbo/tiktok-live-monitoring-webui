@@ -23,7 +23,7 @@ export type UserInfo = {
   uniqueId: string
   nickname: string
   profilePictureUrl: string
-  followRole: number
+  followRole: number // 0 = none; 1 = follower; 2 = friends
   userBadges: UserBadge[]
   userSceneTypes: number[]
   userDetails: UserDetails
@@ -40,6 +40,7 @@ export type BaseLog = UserInfo & {
   createTime: string
   log_type: ActivityType
   displayType: string
+  currentViewer: number //* Custom
 }
 export type CommentLog = BaseLog & {
   emotes: string[]
@@ -78,7 +79,7 @@ export type GiftLog = BaseLog & {
   receiverUserId: string
   timestamp: number
   groupId: string
-  isStreak: boolean
+  isStreak: boolean //* Custom
 }
 
 export type LogData = CommentLog & LikeLog & ViewLog & GiftLog & SubscribeLog
