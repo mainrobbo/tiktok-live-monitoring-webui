@@ -5,14 +5,13 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { Separator } from './ui/separator'
-import { BellRingIcon, ChartBarBigIcon } from 'lucide-react'
+import { BellRingIcon, MonitorCogIcon } from 'lucide-react'
 import ExportButton from './button/export-button'
 import { AppSettingPopover } from './app-settings'
 import ConnectButton from './button/connect-button'
@@ -23,7 +22,7 @@ import DisconnectButton from './button/disconnect-button'
 
 export function AppSidebar() {
   return (
-    <Sidebar>
+    <Sidebar collapsible='offcanvas'>
       <SidebarHeader>
         <h1 className='text-xl text-center'>Advanced Tiktok Live</h1>
         <Separator />
@@ -44,14 +43,20 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton disabled>
-                  <BellRingIcon />
-                  Stream Overlay
+                  <MonitorCogIcon />
+                  Monitoring
                 </SidebarMenuButton>
               </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton disabled>
-                  <ChartBarBigIcon />
-                  Streaming Graph
+                  <BellRingIcon />
+                  Stream Overlay
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
