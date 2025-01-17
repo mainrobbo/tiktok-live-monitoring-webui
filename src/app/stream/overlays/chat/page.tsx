@@ -38,8 +38,14 @@ function convertToChatSetting(settings: { [k: string]: any }): ChatSetting {
     appearPosition: settings.appearPosition,
   }
 }
-
 export default function ChatOverlay() {
+  return (
+    <Suspense fallback={<>Loading...</>}>
+      <ChatOverlayComponent />
+    </Suspense>
+  )
+}
+export function ChatOverlayComponent() {
   const dispatch = useDispatch()
   const { live } = useSelector((state: RootState) => state.connection)
   const [settings, setSettings] = useState<ChatSetting | null>(null)
@@ -113,14 +119,12 @@ export default function ChatOverlay() {
       ) as Message[]
   }, [list])
   return (
-    <Suspense fallback={<>Loading...</>}>
-      live && (
+    live && (
       <MessagesList
         formatTimestamp={formatTimestamp}
         settings={settings as ChatSetting}
         messages={transformList()}
       />
-      )
-    </Suspense>
+    )
   )
 }
