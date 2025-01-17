@@ -117,7 +117,7 @@ export default function VideoPlayer({ src }: { src: string }) {
   }
   return (
     <div className='w-full flex flex-col items-center justify-center gap-2'>
-      <div className='px-5 bg-black w-[500px] flex items-center justify-center'>
+      <div className='px-5 bg-black w-full lg:w-[500px] flex items-center justify-center'>
         <MediaController style={chromeStyles} defaultSubtitles>
           <video
             slot='media'
@@ -126,7 +126,7 @@ export default function VideoPlayer({ src }: { src: string }) {
             preload='auto'
             autoPlay
             muted
-            className='w-full h-[400px] object-fit flex px-5'
+            className='w-full h-full lg:h-[400px] object-fit flex px-5'
             crossOrigin=''
           />
           <MediaLoadingIndicator

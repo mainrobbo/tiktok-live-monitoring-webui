@@ -1,5 +1,6 @@
 'use client'
 import { isLogsExist } from '@/components/selector/logs'
+import EngagementChart from '@/components/views/engagement-chart'
 import ExpandableChart from '@/components/views/expandable-chart'
 import LandingPage from '@/components/views/landing'
 import ChatList from '@/components/views/list/chat-list'
@@ -19,8 +20,9 @@ export default function Home() {
       {(live && connected) || logs ? (
         <>
           <RoomInfoComponent />
-          <div className='w-full lg:col-span-3'>
+          <div className='w-full lg:col-span-3 flex items-start flex-col lg:flex-row gap-2'>
             <ExpandableChart />
+            <EngagementChart />
           </div>
           <ChatList />
           <LikeList />
