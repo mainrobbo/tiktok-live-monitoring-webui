@@ -9,8 +9,9 @@ import { LogEntry } from '@/store/logsSlice'
 import { debounce, throttle } from 'lodash'
 import moment from 'moment'
 import { useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, Suspense } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+
 function convertToChatSetting(settings: { [k: string]: any }): ChatSetting {
   return {
     fontSize: settings.fontSize,
@@ -112,12 +113,14 @@ export default function ChatOverlay() {
       ) as Message[]
   }, [list])
   return (
-    live && (
+    <Suspense>
+      live && (
       <MessagesList
         formatTimestamp={formatTimestamp}
         settings={settings as ChatSetting}
         messages={transformList()}
       />
-    )
+      )
+    </Suspense>
   )
 }
