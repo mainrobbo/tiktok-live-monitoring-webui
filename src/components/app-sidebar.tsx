@@ -19,8 +19,16 @@ import PreferencesButton from './button/preferences-button'
 import CleanButton from './button/clean-button'
 import { UsernameInput } from './input'
 import DisconnectButton from './button/disconnect-button'
+import { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 
 export function AppSidebar() {
+  const [displayTemporary, setDisplayTemporary] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
+  useEffect(() => {
+    if (pathname == '/') setDisplayTemporary(true)
+  }, [])
   return (
     <Sidebar collapsible='offcanvas'>
       <SidebarHeader>
@@ -29,13 +37,15 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <UsernameInput />
-          <div className='flex items-center mt-2 gap-1'>
-            <ConnectButton />
-            <DisconnectButton />
-            <CleanButton />
-            <AppSettingPopover />
-          </div>
+          {displayTemporary && <UsernameInput />}
+          {displayTemporary && (
+            <div className='flex items-center mt-2 gap-1'>
+              <ConnectButton />
+              <DisconnectButton />
+              <CleanButton />
+              <AppSettingPopover />
+            </div>
+          )}
           <PreferencesButton />
         </SidebarGroup>
         <SidebarGroup>
@@ -54,7 +64,9 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton disabled>
+                <SidebarMenuButton
+                  onClick={() => router.push('/tools/chatOverlay')}
+                >
                   <BellRingIcon />
                   Stream Overlay
                 </SidebarMenuButton>

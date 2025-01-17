@@ -32,10 +32,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          {' '}
-          <ThemeProvider defaultTheme='dark' attribute='class'>
-            <AppLayout>{children}</AppLayout>
-          </ThemeProvider>
+          {children}
         </body>
       </ReactLenis>
     </html>

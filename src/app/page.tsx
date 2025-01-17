@@ -1,4 +1,5 @@
 'use client'
+import AppLayout from '@/components/app-layout'
 import { isLogsExist } from '@/components/selector/logs'
 import EngagementChart from '@/components/views/engagement-chart'
 import ExpandableChart from '@/components/views/expandable-chart'
@@ -13,6 +14,14 @@ import RoomInfoComponent from '@/components/views/room-info'
 import { useSelector } from 'react-redux'
 
 export default function Home() {
+  return (
+    <AppLayout>
+      <Temporary />
+    </AppLayout>
+  )
+}
+
+function Temporary() {
   const { live, connected } = useSelector((state: any) => state.connection)
   const logs = useSelector(isLogsExist)
   return (

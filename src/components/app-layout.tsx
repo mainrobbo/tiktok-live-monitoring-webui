@@ -5,18 +5,21 @@ import { AppSidebar } from './app-sidebar'
 import { SidebarProvider } from './ui/sidebar'
 import { Provider } from 'react-redux'
 import { store } from '@/store'
+import { ThemeProvider } from 'next-themes'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
+    <ThemeProvider defaultTheme='dark' attribute='class'>
       <Provider store={store}>
-        <AppSidebar />
-        <main className='w-full h-screen'>
-          <AppNavbar />
-          {children}
-        </main>
-        <Toaster richColors position='top-center' />
+        <SidebarProvider>
+          <AppSidebar />
+          <main className='w-full h-screen'>
+            <AppNavbar />
+            {children}
+          </main>
+          <Toaster richColors position='top-center' />
+        </SidebarProvider>
       </Provider>
-    </SidebarProvider>
+    </ThemeProvider>
   )
 }
