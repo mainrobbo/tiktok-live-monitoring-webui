@@ -32,7 +32,7 @@ export enum SocketActionType {
 
 export interface StartSocketAction {
   type: SocketActionType.START
-  payload: { url: string }
+  payload: { url: string; username: string }
 }
 
 export type SocketAction = StartSocketAction
