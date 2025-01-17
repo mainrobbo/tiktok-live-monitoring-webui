@@ -45,7 +45,7 @@ export default function ChatOverlay() {
     </Suspense>
   )
 }
-export function ChatOverlayComponent() {
+function ChatOverlayComponent() {
   const dispatch = useDispatch()
   const { live } = useSelector((state: RootState) => state.connection)
   const [settings, setSettings] = useState<ChatSetting | null>(null)
