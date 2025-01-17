@@ -11,9 +11,6 @@ export default function DisconnectButton() {
   const handleDisconnect = () => {
     dispatch({ type: SocketActionType.STOP })
   }
-  const cek = () => {
-    console.log('state', state)
-  }
   return (
     <>
       <Button
@@ -23,9 +20,6 @@ export default function DisconnectButton() {
         size={'sm'}
       >
         Stop
-      </Button>
-      <Button onClick={cek} variant={'destructive'} size={'sm'}>
-        C
       </Button>
     </>
   )
