@@ -22,21 +22,6 @@ import { useSelector } from 'react-redux'
 import { getAllLogs } from '../selector/logs'
 import { LogEntry } from '@/store/logsSlice'
 import { getMinutesData, simplifyNumber } from '@/lib/helper/transform'
-import { RootState } from '@/store'
-
-type ChartData = {
-  [key: string]: {
-    createTime: string
-    gift: number
-    view: number
-    like: number
-    comment: number
-    share: number
-    follow: number
-    subscribe: number
-    mic_armies: number
-  }
-}
 
 const chartConfig = {
   visitors: {
@@ -158,7 +143,6 @@ export default function ExpandableChart() {
         follow,
         subscribe,
         mic_armies,
-        currentViewers,
       }) => ({
         createTime: moment(moment.unix(parseInt(rawTime) / 1000)).format(
           'HH:mm',
@@ -171,7 +155,6 @@ export default function ExpandableChart() {
         share,
         subscribe,
         mic_armies,
-        currentViewers,
       }),
     )
   }, [processedLogs])
@@ -201,7 +184,6 @@ export default function ExpandableChart() {
     share: number
     subscribe: number
     mic_armies: number
-    currentViewers: number
   }
   const countTotal = (key: keyof t) =>
     simplifyNumber(
@@ -430,16 +412,6 @@ export default function ExpandableChart() {
                           content={<ChartTooltipContent indicator='dot' />}
                         />
 
-                        {/* {isExpanded && (
-                          <Area
-                            dataKey='currentViewers'
-                            // type='natural'
-                            fill='url(#fillViewers)'
-                            // stroke='var(--color-viewers)'
-                            stackId='b'
-                          />
-                        )} */}
-
                         {((isExpanded && activeChart.includes('view')) ||
                           activeChart == undefined) && (
                           <Area
@@ -518,7 +490,6 @@ export default function ExpandableChart() {
               isExpanded ? `border-t` : `border-t-0`
             }`}
           >
-            <CurrentViewers />
             {['view', 'like', 'comment', 'gift', 'share', 'follow'].map(
               (key, i) => {
                 const chart = key as keyof typeof chartConfig
@@ -554,53 +525,5 @@ export default function ExpandableChart() {
         </div>
       </CardFooter>
     </Card>
-  )
-}
-
-function CurrentViewers() {
-  const { viewers } = useSelector((state: RootState) => state.liveInfo)
-  const prevViewersRef = useRef<number>(viewers)
-  const [changeDirection, setChangeDirection] = useState<'up' | 'down'>('down')
-
-  useEffect(() => {
-    // Calculate direction only if viewers changed
-    if (viewers > prevViewersRef.current) {
-      setChangeDirection('up')
-    } else if (viewers < prevViewersRef.current) {
-      setChangeDirection('down')
-    }
-
-    // Update the ref after calculating changeDirection
-    prevViewersRef.current = viewers
-  }, [viewers])
-
-  const showData = useMemo(() => simplifyNumber(viewers), [viewers])
-
-  return (
-    <div className='w-full flex flex-1 flex-col items-center justify-center gap-1 border-t px-0 lg:px-6 py-3 lg:py-4 text-left even:border-l bg-primary sm:border-l sm:border-t-0 sm:px-8 sm:py-6'>
-      <span className='text-xs text-white font-bold'>Current Viewers</span>
-      <span className='text-lg font-bold leading-none sm:text-3xl flex items-center'>
-        {/* Display the animated number */}
-        <NumberFlow
-          value={showData.value}
-          transformTiming={{
-            duration: 500,
-            easing: 'ease-out',
-          }}
-        />
-        {showData.pembilangan}
-
-        {/* Show the direction indicator */}
-        <span
-          className={`ml-2 transition-all ${
-            changeDirection === 'up'
-              ? 'text-emerald-500'
-              : 'text-amber-500 rotate-180'
-          }`}
-        >
-          <ArrowUpCircleIcon />
-        </span>
-      </span>
-    </div>
   )
 }

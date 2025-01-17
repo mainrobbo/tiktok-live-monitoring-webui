@@ -22,8 +22,8 @@ export function removeDuplicates<T>(
   })
 }
 
-export const getMinutesData = (data: LogEntry[], period = 3) =>
-  data
+export const getMinutesData = (data: LogEntry[], period = 3) => {
+  return data
     .sort((a, b) => parseInt(a.data.createTime) - parseInt(b.data.createTime))
     .reduce((result, current) => {
       const {
@@ -55,29 +55,50 @@ export const getMinutesData = (data: LogEntry[], period = 3) =>
           subscribe: 0,
           mic_armies: 0,
           rawTime: t,
+          totalActivities: 0,
         }
       }
-      if (log_type == ActivityType.LIKE && isStreak == false) {
-        result[bucketStartTime].like += likeCount
+      if (log_type == ActivityType.LIKE) {
+        result[bucketStartTime].like++
+        result[bucketStartTime].totalActivities++
       }
-      if (log_type == ActivityType.COMMENT) result[bucketStartTime].comment++
-      if (log_type == ActivityType.SHARE) result[bucketStartTime].share++
-      if (log_type == ActivityType.FOLLOW) result[bucketStartTime].follow++
-      if (log_type == ActivityType.VIEW) result[bucketStartTime].view++
+      if (log_type == ActivityType.COMMENT) {
+        result[bucketStartTime].comment++
+        result[bucketStartTime].totalActivities++
+      }
+      if (log_type == ActivityType.SHARE) {
+        result[bucketStartTime].share++
+        result[bucketStartTime].totalActivities++
+      }
+      if (log_type == ActivityType.FOLLOW) {
+        result[bucketStartTime].follow++
+        result[bucketStartTime].totalActivities++
+      }
+      if (log_type == ActivityType.VIEW) {
+        result[bucketStartTime].totalActivities++
+
+        result[bucketStartTime].view++
+      }
       if (log_type == ActivityType.SUBSCRIBE) {
+        result[bucketStartTime].totalActivities++
+
         result[bucketStartTime].subscribe++
       }
       if (log_type == ActivityType.GIFT && !(giftType == 1 && !repeatEnd)) {
-        result[bucketStartTime].gift += repeatCount
+        result[bucketStartTime].totalActivities++
+
+        result[bucketStartTime].gift++
       }
       if (log_type == ActivityType.MIC_ARMIES) {
+        result[bucketStartTime].totalActivities++
+
         result[bucketStartTime].mic_armies++
       }
-      if (result[bucketStartTime].currentViewers < currentViewers)
-        result[bucketStartTime].currentViewers = currentViewers
+      result[bucketStartTime].currentViewers = currentViewers
+
       return result
     }, {} as { [key: string]: any })
-
+}
 export const simplifyNumber = (value: number) => {
   let pembilangan = ''
   if (value >= 1_000_000) {
