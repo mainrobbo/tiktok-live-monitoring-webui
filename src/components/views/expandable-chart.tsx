@@ -173,7 +173,7 @@ export default function ExpandableChart() {
             mic_armies: 0,
           }
         }
-        if (type === ActivityType.LIKE) {
+        if (type === ActivityType.LIKE && data.isStreak == false) {
           res[createTime][type] += likeCount
         } else {
           res[createTime][type]++
@@ -309,7 +309,7 @@ export default function ExpandableChart() {
     setActiveChart(temporary)
   }
   return (
-    <Card className='w-full transition-all duration-300 hover:shadow-lg h-full pb-0 h-fit'>
+    <Card className='w-full transition-all duration-300 hover:shadow-lg pb-0 h-fit'>
       <div className='flex flex-col lg:flex-row justify-around items-center w-full border-b'>
         <CardHeader
           className='space-y-1 p-0 cursor-pointer w-full'

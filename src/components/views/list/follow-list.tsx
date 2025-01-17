@@ -7,14 +7,14 @@ import { Separator } from '@/components/ui/separator'
 import BubblePerson from '../bubble-person'
 import BubbleTime from '../bubble-time'
 import { useSelector } from 'react-redux'
-import { getLimitedShare } from '@/components/selector/logs'
+import { getLimitedFollow } from '@/components/selector/logs'
 import { LogEntry } from '@/store/logsSlice'
 import { AnimatePresence, motion } from 'framer-motion'
 import { RootState } from '@/store'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 export default function FollowList({ defaultOpen = true }) {
   const [list, setList] = useState<LogEntry[]>([])
-  const logs = useSelector((state: RootState) => getLimitedShare(state))
+  const logs = useSelector((state: RootState) => getLimitedFollow(state))
   const chatsRef = useRef<LogEntry[]>(logs)
   const [expanded, setIsExpanded] = useState(defaultOpen)
 
