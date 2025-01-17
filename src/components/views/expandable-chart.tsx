@@ -1,39 +1,12 @@
 'use client'
 
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useContext,
-  useMemo,
-  useCallback,
-} from 'react'
-import { motion, AnimatePresence, m } from 'framer-motion'
-import {
-  Clock,
-  GitBranch,
-  Github,
-  MessageSquare,
-  StepForwardIcon as Progress,
-  Star,
-  Users,
-  CheckCircle2,
-} from 'lucide-react'
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowUpCircleIcon } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Progress as ProgressBar } from '@/components/ui/progress'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import { useExpandable } from '@/hooks/use-expandable'
 import { debounce } from 'lodash'
 import moment from 'moment'
-import { ActivityType } from '@/lib/types/common'
 import {
   ChartConfig,
   ChartContainer,
@@ -48,6 +21,8 @@ import NumberFlow from '@number-flow/react'
 import { useSelector } from 'react-redux'
 import { getAllLogs } from '../selector/logs'
 import { LogEntry } from '@/store/logsSlice'
+import { getMinutesData, simplifyNumber } from '@/lib/helper/transform'
+import { RootState } from '@/store'
 
 type ChartData = {
   [key: string]: {
@@ -68,7 +43,7 @@ const chartConfig = {
     label: 'Visitors',
   },
   view: {
-    label: 'Viewers',
+    label: 'View',
     color: 'hsl(var(--chart-1))',
   },
   like: {
@@ -90,6 +65,10 @@ const chartConfig = {
   follow: {
     label: 'Followers',
     color: 'hsl(var(--chart-5))',
+  },
+  currentViewers: {
+    label: 'Viewers',
+    color: 'hsl(var(--chart-6))',
   },
 } satisfies ChartConfig
 
@@ -155,46 +134,9 @@ export default function ExpandableChart() {
     }
   }, [])
   const transformedData = useCallback(() => {
-    const countOccurrences = processedLogs.reduce(
-      (res: any, log: LogEntry) => {
-        const { data, timestamp } = log
-        const { likeCount, log_type: type } = data
-        const createTime = moment(moment.unix(timestamp)).format('hh:mm')
-        if (!res[createTime as keyof ChartData]) {
-          res[createTime] = {
-            createTime,
-            gift: 0,
-            view: 0,
-            like: 0,
-            comment: 0,
-            share: 0,
-            follow: 0,
-            subscribe: 0,
-            mic_armies: 0,
-          }
-        }
-        if (type === ActivityType.LIKE && data.isStreak == false) {
-          res[createTime][type] += likeCount
-        } else {
-          res[createTime][type]++
-        }
-        return res
-      },
-      {} as {
-        createTime?: string
-        like: number
-        comment: number
-        gift: number
-        share: number
-        view: number
-        subscribe: number
-        follow: number
-      },
-    )
-
     return (
-      Object.values(countOccurrences) as {
-        createTime: string
+      Object.values(getMinutesData(processedLogs)) as {
+        rawTime: string
         gift: number
         view: number
         like: number
@@ -203,10 +145,11 @@ export default function ExpandableChart() {
         share: number
         subscribe: number
         mic_armies: number
+        currentViewers: number
       }[]
     ).map(
       ({
-        createTime,
+        rawTime,
         gift,
         view,
         like,
@@ -215,8 +158,11 @@ export default function ExpandableChart() {
         follow,
         subscribe,
         mic_armies,
+        currentViewers,
       }) => ({
-        createTime,
+        createTime: moment(moment.unix(parseInt(rawTime) / 1000)).format(
+          'HH:mm',
+        ),
         gift,
         view,
         like,
@@ -225,6 +171,7 @@ export default function ExpandableChart() {
         share,
         subscribe,
         mic_armies,
+        currentViewers,
       }),
     )
   }, [processedLogs])
@@ -254,22 +201,16 @@ export default function ExpandableChart() {
     share: number
     subscribe: number
     mic_armies: number
+    currentViewers: number
   }
-  const countTotal = (key: keyof t) => {
-    let count = transformedDataArray.reduce(
-      (acc, curr) => acc + (curr[key] as number),
-      0,
+  const countTotal = (key: keyof t) =>
+    simplifyNumber(
+      transformedDataArray.reduce(
+        (acc, curr) => acc + (curr[key] as number),
+        0,
+      ),
     )
-    let pembilangan = ''
-    if (count >= 1_000_000) {
-      pembilangan = 'M'
-      count = count / 1_000_000
-    } else if (count >= 10_000) {
-      pembilangan = 'K'
-      count = count / 1_000
-    }
-    return { count, pembilangan }
-  }
+
   const total = useMemo(() => {
     return {
       like: countTotal('like'),
@@ -349,6 +290,24 @@ export default function ExpandableChart() {
                     >
                       <AreaChart data={transformedDataArray}>
                         <defs>
+                          <linearGradient
+                            id='fillViewers'
+                            x1='0'
+                            y1='0'
+                            x2='0'
+                            y2='1'
+                          >
+                            <stop
+                              offset='5%'
+                              stopColor='var(--color-viewers)'
+                              stopOpacity={0.8}
+                            />
+                            <stop
+                              offset='95%'
+                              stopColor='var(--color-viewers)'
+                              stopOpacity={0.1}
+                            />
+                          </linearGradient>
                           <linearGradient
                             id='fillView'
                             x1='0'
@@ -470,6 +429,17 @@ export default function ExpandableChart() {
                           cursor={false}
                           content={<ChartTooltipContent indicator='dot' />}
                         />
+
+                        {/* {isExpanded && (
+                          <Area
+                            dataKey='currentViewers'
+                            // type='natural'
+                            fill='url(#fillViewers)'
+                            // stroke='var(--color-viewers)'
+                            stackId='b'
+                          />
+                        )} */}
+
                         {((isExpanded && activeChart.includes('view')) ||
                           activeChart == undefined) && (
                           <Area
@@ -526,7 +496,7 @@ export default function ExpandableChart() {
                             dataKey='follow'
                             type='natural'
                             fill='url(#fillFollow)'
-                            stroke='var(--color-follow  )'
+                            stroke='var(--color-follow)'
                             stackId='a'
                           />
                         )}
@@ -548,6 +518,7 @@ export default function ExpandableChart() {
               isExpanded ? `border-t` : `border-t-0`
             }`}
           >
+            <CurrentViewers />
             {['view', 'like', 'comment', 'gift', 'share', 'follow'].map(
               (key, i) => {
                 const chart = key as keyof typeof chartConfig
@@ -564,7 +535,7 @@ export default function ExpandableChart() {
                     </span>
                     <span className='text-lg font-bold leading-none sm:text-3xl'>
                       <NumberFlow
-                        value={total[key as keyof typeof total].count}
+                        value={total[key as keyof typeof total].value}
                         transformTiming={{
                           duration: 500,
                           easing: 'ease-out',
@@ -583,5 +554,53 @@ export default function ExpandableChart() {
         </div>
       </CardFooter>
     </Card>
+  )
+}
+
+function CurrentViewers() {
+  const { viewers } = useSelector((state: RootState) => state.liveInfo)
+  const prevViewersRef = useRef<number>(viewers)
+  const [changeDirection, setChangeDirection] = useState<'up' | 'down'>('down')
+
+  useEffect(() => {
+    // Calculate direction only if viewers changed
+    if (viewers > prevViewersRef.current) {
+      setChangeDirection('up')
+    } else if (viewers < prevViewersRef.current) {
+      setChangeDirection('down')
+    }
+
+    // Update the ref after calculating changeDirection
+    prevViewersRef.current = viewers
+  }, [viewers])
+
+  const showData = useMemo(() => simplifyNumber(viewers), [viewers])
+
+  return (
+    <div className='w-full flex flex-1 flex-col items-center justify-center gap-1 border-t px-0 lg:px-6 py-3 lg:py-4 text-left even:border-l bg-primary sm:border-l sm:border-t-0 sm:px-8 sm:py-6'>
+      <span className='text-xs text-white font-bold'>Current Viewers</span>
+      <span className='text-lg font-bold leading-none sm:text-3xl flex items-center'>
+        {/* Display the animated number */}
+        <NumberFlow
+          value={showData.value}
+          transformTiming={{
+            duration: 500,
+            easing: 'ease-out',
+          }}
+        />
+        {showData.pembilangan}
+
+        {/* Show the direction indicator */}
+        <span
+          className={`ml-2 transition-all ${
+            changeDirection === 'up'
+              ? 'text-emerald-500'
+              : 'text-amber-500 rotate-180'
+          }`}
+        >
+          <ArrowUpCircleIcon />
+        </span>
+      </span>
+    </div>
   )
 }
