@@ -12,7 +12,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { DataTable } from '../data-table'
 import { Button } from '@/components/ui/button'
 import { DialogTrigger } from '@radix-ui/react-dialog'
@@ -34,29 +34,29 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import moment from 'moment'
-import { LogData } from '@/lib/types/log'
 import { useSelector } from 'react-redux'
-import { get10MostWords, getMostWordByFilter } from '@/components/selector/logs'
+import { getMostGiftByFilter } from '@/components/selector/logs'
 import { RootState } from '@/store'
 import { removeDuplicates } from '@/lib/helper/transform'
 type UserData = {
   uniqueId: string
-  id: string
+  userId: string
   nickname: string
   profilePictureUrl: string
 }
 
-type OutputType = { comment: string; user: UserData; time: string }
+type OutputType = { user: UserData; repeatCount: number; diamondCount: number }
 
-export default function ShowListChat({
-  word = '',
+export default function ShowListGift({
+  giftName = '',
+  giftPictureUrl,
   username = '',
   dialogOpenState = false,
   setDialogOpenState,
   TriggerElement,
 }: {
-  word?: string
+  giftName?: string
+  giftPictureUrl: string
   username?: string
   dialogOpenState?: boolean
   setDialogOpenState?: (arg0: boolean) => void
@@ -68,41 +68,18 @@ export default function ShowListChat({
   const [selectedUsername, setSelectedUsername] = useState(username)
 
   const columnVisibility = {
-    comment: true,
     user: username == '',
-    time: true,
   }
 
   const mostWords = useSelector((state: RootState) =>
-    getMostWordByFilter(state, '', word),
+    getMostGiftByFilter(state, giftName),
   )
-  const filteredMostWords = useMemo(() => {
-    return mostWords.filter(
-      d =>
-        d.user.uniqueId.includes(selectedUsername) && d.comment.includes(word),
-    )
+  const filteredData = useMemo(() => {
+    return mostWords.filter(d => d.user.uniqueId.includes(selectedUsername))
   }, [selectedUsername])
 
   const columns: ColumnDef<OutputType>[] = useMemo(
     () => [
-      {
-        accessorKey: 'comment',
-        header: () => <div className='text-left'>Comment</div>,
-        cell: ({ getValue }: CellContext<OutputType, unknown>) => {
-          const val = getValue() as string
-          return val
-        },
-      },
-      {
-        accessorKey: 'time',
-        header: () => <div className='text-left'>Time</div>,
-        cell: ({ getValue }: CellContext<OutputType, unknown>) => {
-          const val = getValue() as string
-          return moment(moment.unix(Math.round(parseInt(val) / 1000))).format(
-            'hh:mm:ss',
-          )
-        },
-      },
       {
         accessorKey: 'user',
         header: () => <div className='text-left'>User</div>,
@@ -119,6 +96,22 @@ export default function ShowListChat({
           )
         },
       },
+      {
+        accessorKey: 'repeatCount',
+        header: () => <div className='text-left'>Total Gift</div>,
+        cell: ({ getValue }: CellContext<OutputType, unknown>) => {
+          const val = getValue() as number
+          return val
+        },
+      },
+      {
+        accessorKey: 'diamondCount',
+        header: () => <div className='text-left'>Total Coin</div>,
+        cell: ({ getValue, row }: CellContext<OutputType, unknown>) => {
+          const val = getValue() as number
+          return val * row.original.repeatCount
+        },
+      },
     ],
     [showUsername, mostWords],
   )
@@ -127,12 +120,12 @@ export default function ShowListChat({
     () =>
       removeDuplicates(
         mostWords.map(u => u.user),
-        'id',
+        'userId',
       ),
-    [filteredMostWords],
+    [filteredData],
   )
   const table = useReactTable({
-    data: filteredMostWords,
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: {
@@ -163,12 +156,12 @@ export default function ShowListChat({
       )}
       <DialogContent className='sm:max-w-[625px] min-h-[500px] flex flex-col gap-3'>
         <DialogHeader>
-          <DialogTitle>List Comment</DialogTitle>
+          <DialogTitle>List Gift</DialogTitle>
           <DialogDescription>
-            Showing comment{' '}
-            {word && (
+            Showing gift{' '}
+            {giftName && (
               <>
-                containing <span className='font-bold'>{word}</span>
+                <span className='font-bold'>{giftName}</span>
               </>
             )}{' '}
             {selectedUsername && <>from @{selectedUsername}</>}
@@ -185,6 +178,7 @@ export default function ShowListChat({
             <Label>Show username</Label>
           </div>
         )}
+
         {username == '' && (
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>

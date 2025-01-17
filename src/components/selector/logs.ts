@@ -117,6 +117,42 @@ export const getMostWordByFilter = createSelector(
       .slice(0, 10)
   },
 )
+export const getMostGiftByFilter = createSelector(
+  (state: RootState) => state,
+  (state: RootState, giftName: string) => giftName,
+  (state: RootState, giftName: string) => {
+    if (!giftName) return []
+    return Object.values(
+      Array.from(state.logs.gift.values()).reduce((arr, { data }) => {
+        const { uniqueId, repeatCount, diamondCount } = data
+        if (!arr[uniqueId]) {
+          arr[uniqueId] = {
+            repeatCount: repeatCount,
+            diamondCount: diamondCount,
+            user: {
+              uniqueId: data.uniqueId,
+              userId: data.userId,
+              nickname: data.nickname,
+              profilePictureUrl: data.profilePictureUrl,
+            },
+          }
+        }
+        arr[uniqueId].repeatCount += repeatCount
+        return arr
+      }, {} as { [key: string]: { user: UserData; repeatCount: number; diamondCount: number } }),
+    )
+      .map(({ user, repeatCount, diamondCount }) => ({
+        diamondCount,
+        user,
+        repeatCount,
+      }))
+      .sort(
+        (a, b) =>
+          b.diamondCount * b.repeatCount - a.diamondCount * a.repeatCount,
+      )
+      .slice(0, 10)
+  },
+)
 export const getLikesByUniqueId = createSelector(
   (state: RootState) => state,
   (state: RootState, uniqueId?: string) => uniqueId,
@@ -280,5 +316,53 @@ export const get10MostWords = createSelector([comments], comments => {
       times: times.toString(),
     }))
     .sort((a, b) => parseInt(b.times) - parseInt(a.times))
+    .filter((_, i) => i < 10)
+})
+
+export type Most10GiftType = {
+  giftName: string
+  diamondTotal: number
+  repeatTotal: number
+  users: UserData['uniqueId'][]
+  giftPictureUrl: string
+}
+export const get10MostGift = createSelector([gift], gift => {
+  return (
+    Object.values(
+      Array.from(gift.values()).reduce((acc, { data }) => {
+        const {
+          repeatCount,
+          giftName,
+          diamondCount,
+          uniqueId,
+          giftPictureUrl,
+        } = data
+        if (!acc[giftName]) {
+          acc[giftName] = {
+            giftName: giftName,
+            diamondTotal: 0,
+            repeatTotal: 0,
+            users: [],
+            giftPictureUrl: '',
+          }
+        }
+        acc[giftName].diamondTotal += diamondCount * repeatCount
+        acc[giftName].repeatTotal += repeatCount
+        acc[giftName].giftPictureUrl = giftPictureUrl
+        if (!acc[giftName].users.some(user => user === uniqueId)) {
+          acc[giftName].users.push(uniqueId)
+        }
+        return acc
+      }, {} as { [key: string]: { giftName: string; diamondTotal: number; repeatTotal: number; users: UserData['uniqueId'][]; giftPictureUrl: string } }),
+    ) as Most10GiftType[]
+  )
+    .map(({ giftName, diamondTotal, repeatTotal, users, giftPictureUrl }) => ({
+      giftName,
+      diamondTotal,
+      repeatTotal,
+      users,
+      giftPictureUrl,
+    }))
+    .sort((a, b) => b.diamondTotal - a.diamondTotal)
     .filter((_, i) => i < 10)
 })

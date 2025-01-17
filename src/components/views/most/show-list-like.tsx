@@ -21,12 +21,6 @@ import moment from 'moment'
 import { useSelector } from 'react-redux'
 import { getLikesByUniqueId } from '@/components/selector/logs'
 import { RootState } from '@/store'
-type UserData = {
-  uniqueId: string
-  id: string
-  nickname: string
-  profilePictureUrl: string
-}
 
 type OutputType = { count: number; time: string }
 
