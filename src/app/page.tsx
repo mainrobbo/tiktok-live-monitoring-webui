@@ -17,7 +17,7 @@ export default function Home() {
   const logs = useSelector(isLogsExist)
   return (
     <div className='grid grid-cols-1 lg:grid-cols-3 gap-2 w-full justify-items-stretch justify-align-start h-fit p-2'>
-      {/* {(live && connected) || logs ? (
+      {(live && connected) || logs ? (
         <>
           <RoomInfoComponent />
           <div className='w-full lg:col-span-3 flex items-start flex-col lg:flex-row gap-2'>
@@ -33,7 +33,7 @@ export default function Home() {
         </>
       ) : (
         <LandingPage />
-      )} */}
+      )}
     </div>
   )
 }
