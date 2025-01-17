@@ -6,23 +6,26 @@ import GameTagRoomInfo from './room-info/game-tag'
 import { Button } from '../ui/button'
 import { useSelector } from 'react-redux'
 import { getLiveInfo } from '../selector/liveInfo'
+import { RoomInfo } from '@/lib/types/liveInfo'
+
+const getStreamingUrl = (roomInfo: RoomInfo) => {
+  if (
+    !roomInfo?.stream_url?.hls_pull_url &&
+    !roomInfo?.stream_url?.flv_pull_url
+  )
+    return false
+  if (roomInfo?.stream_url?.hls_pull_url != '')
+    return roomInfo?.stream_url?.hls_pull_url
+  if (roomInfo?.stream_url?.flv_pull_url?.HD1 != '')
+    return roomInfo?.stream_url?.flv_pull_url?.HD1
+  if (roomInfo?.stream_url?.flv_pull_url?.SD1 != '')
+    return roomInfo?.stream_url?.flv_pull_url?.SD1
+  return false
+}
+
 const RoomInfoComponent = memo(() => {
   const { roomInfo } = useSelector(getLiveInfo)
   if (!roomInfo?.hashtag?.title) return <></>
-  const getStreamingUrl = () => {
-    if (
-      !roomInfo?.stream_url?.hls_pull_url &&
-      !roomInfo?.stream_url?.flv_pull_url
-    )
-      return false
-    if (roomInfo?.stream_url?.hls_pull_url != '')
-      return roomInfo?.stream_url?.hls_pull_url
-    if (roomInfo?.stream_url?.flv_pull_url?.HD1 != '')
-      return roomInfo?.stream_url?.flv_pull_url?.HD1
-    if (roomInfo?.stream_url?.flv_pull_url?.SD1 != '')
-      return roomInfo?.stream_url?.flv_pull_url?.SD1
-    return false
-  }
   return (
     <div className='flex flex-col lg:flex-row items-start w-full lg:col-span-3 gap-2'>
       <Card className=''>
@@ -45,16 +48,16 @@ const RoomInfoComponent = memo(() => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {getStreamingUrl() && (
+          {getStreamingUrl(roomInfo) && (
             <div className='flex flex-col w-fit justify-center gap-2 items-center'>
               <Suspense fallback={<div>Loading...</div>}>
-                <VideoPlayer src={getStreamingUrl() as string} />
+                <VideoPlayer src={getStreamingUrl(roomInfo) as string} />
               </Suspense>
             </div>
           )}
         </CardContent>
       </Card>
-      <Card className='w-full'>
+      <Card className='w-full h-full'>
         <CardHeader>
           <CardTitle>
             <span className='font-medium tracking-wide text-muted-foreground'>

@@ -13,7 +13,7 @@ export type GameTag = {
   short_name: string
   show_name: string
 }
-type RoomInfo = {
+export type RoomInfo = {
   title?: string
   stream_url?: {
     flv_pull_url?: {

@@ -40,7 +40,7 @@ export type BaseLog = UserInfo & {
   createTime: string
   log_type: ActivityType
   displayType: string
-  currentViewer: number //* Custom
+  currentViewers: number //* Custom
 }
 export type CommentLog = BaseLog & {
   emotes: string[]
