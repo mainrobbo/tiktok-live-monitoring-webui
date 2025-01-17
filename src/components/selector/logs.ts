@@ -34,11 +34,17 @@ export const getLimitedViews = createSelector(
   (state: RootState, limit = DEFAULT_LIMIT) =>
     getLimited(Array.from(state.logs[ActivityType.VIEW].values()), limit),
 )
-export const getLimitedShare = createSelector([share], share =>
-  getLimited(Array.from(share.values())),
+export const getLimitedShare = createSelector(
+  (state: RootState) => state,
+  (state: RootState, limit = DEFAULT_LIMIT) => limit,
+  (state: RootState, limit = DEFAULT_LIMIT) =>
+    getLimited(Array.from(state.logs[ActivityType.SHARE].values()), limit),
 )
-export const getLimitedSocial = createSelector([social], social =>
-  getLimited(Array.from(social.values())),
+export const getLimitedSocial = createSelector(
+  (state: RootState) => state,
+  (state: RootState, limit = DEFAULT_LIMIT) => limit,
+  (state: RootState, limit = DEFAULT_LIMIT) =>
+    getLimited(Array.from(state.logs[ActivityType.SOCIAL].values()), limit),
 )
 export const getLimitedGift = createSelector(
   (state: RootState) => state,

@@ -7,14 +7,14 @@ import { Separator } from '@/components/ui/separator'
 import BubblePerson from '../bubble-person'
 import BubbleTime from '../bubble-time'
 import { useSelector } from 'react-redux'
-import { getLimitedViews } from '@/components/selector/logs'
+import { getLimitedShare } from '@/components/selector/logs'
 import { LogEntry } from '@/store/logsSlice'
 import { AnimatePresence, motion } from 'framer-motion'
 import { RootState } from '@/store'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
-export default function ViewList({ defaultOpen = true }) {
+export default function ShareList({ defaultOpen = true }) {
   const [list, setList] = useState<LogEntry[]>([])
-  const logs = useSelector((state: RootState) => getLimitedViews(state))
+  const logs = useSelector((state: RootState) => getLimitedShare(state))
   const chatsRef = useRef<LogEntry[]>(logs)
   const [expanded, setIsExpanded] = useState(defaultOpen)
 
@@ -43,7 +43,7 @@ export default function ViewList({ defaultOpen = true }) {
         className='cursor-pointer select-none'
         onClick={() => setIsExpanded(prev => !prev)}
       >
-        <CardTitle>Views</CardTitle>
+        <CardTitle>Share</CardTitle>
       </CardHeader>
       {expanded && <Separator />}
       <motion.div transition={{ type: 'spring', stiffness: 300, damping: 30 }}>

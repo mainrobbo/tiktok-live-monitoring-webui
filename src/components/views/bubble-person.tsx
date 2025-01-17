@@ -100,6 +100,8 @@ export default function BubblePerson({
 
       {type == ActivityType.VIEW &&
         (isRejoin ? <span>Rejoined.</span> : <span>Joined.</span>)}
+      {type == ActivityType.SHARE && <>Share LIVE.</>}
+      {type == ActivityType.SOCIAL && <>Follow the creator.</>}
     </div>
   )
 }
