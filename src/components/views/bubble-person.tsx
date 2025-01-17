@@ -46,7 +46,7 @@ export default function BubblePerson({
     [ActivityType.LIKE]: '💗',
     [ActivityType.VIEW]: '➡️',
     [ActivityType.SHARE]: '🔗',
-    [ActivityType.SOCIAL]: '👤',
+    [ActivityType.FOLLOW]: '👤',
     [ActivityType.SUBSCRIBE]: '🔔',
     [ActivityType.MIC_ARMIES]: '🎤',
   }
@@ -101,7 +101,7 @@ export default function BubblePerson({
       {type == ActivityType.VIEW &&
         (isRejoin ? <span>Rejoined.</span> : <span>Joined.</span>)}
       {type == ActivityType.SHARE && <>Share LIVE.</>}
-      {type == ActivityType.SOCIAL && <>Follow the creator.</>}
+      {type == ActivityType.FOLLOW && <>Follow the creator.</>}
     </div>
   )
 }

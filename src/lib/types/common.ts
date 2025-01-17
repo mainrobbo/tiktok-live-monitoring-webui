@@ -9,7 +9,7 @@ export enum ActivityType {
   GIFT = 'gift',
   VIEW = 'view',
   SHARE = 'share',
-  SOCIAL = 'social',
+  FOLLOW = 'follow',
   SUBSCRIBE = 'subscribe',
   MIC_ARMIES = 'mic_armies',
 }

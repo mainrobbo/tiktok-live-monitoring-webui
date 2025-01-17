@@ -15,7 +15,7 @@ const initialState: LogsMap = {
   [ActivityType.LIKE]: new Map(),
   [ActivityType.COMMENT]: new Map(),
   [ActivityType.SHARE]: new Map(),
-  [ActivityType.SOCIAL]: new Map(),
+  [ActivityType.FOLLOW]: new Map(),
   [ActivityType.VIEW]: new Map(),
   [ActivityType.GIFT]: new Map(),
   [ActivityType.SUBSCRIBE]: new Map(),

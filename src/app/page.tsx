@@ -5,7 +5,7 @@ import ChatList from '@/components/views/list/chat-list'
 import GiftList from '@/components/views/list/gift-list'
 import LikeList from '@/components/views/list/like-list'
 import ShareList from '@/components/views/list/share-list'
-import SocialList from '@/components/views/list/social-list'
+import FollowList from '@/components/views/list/follow-list'
 import ViewList from '@/components/views/list/view-list'
 import RoomInfoComponent from '@/components/views/room-info'
 import { useSelector } from 'react-redux'
@@ -25,7 +25,7 @@ export default function Home() {
           <GiftList />
           <ViewList defaultOpen={false} />
           <ShareList defaultOpen={false} />
-          <SocialList defaultOpen={false} />
+          <FollowList defaultOpen={false} />
         </>
       ) : (
         <LandingPage />

@@ -57,7 +57,7 @@ type ChartData = {
     like: number
     comment: number
     share: number
-    social: number
+    follow: number
     subscribe: number
     mic_armies: number
   }
@@ -87,7 +87,7 @@ const chartConfig = {
     label: 'Shares',
     color: 'hsl(var(--chart-5))',
   },
-  social: {
+  follow: {
     label: 'Followers',
     color: 'hsl(var(--chart-5))',
   },
@@ -168,7 +168,7 @@ export default function ExpandableChart() {
             like: 0,
             comment: 0,
             share: 0,
-            social: 0,
+            follow: 0,
             subscribe: 0,
             mic_armies: 0,
           }
@@ -188,7 +188,7 @@ export default function ExpandableChart() {
         share: number
         view: number
         subscribe: number
-        social: number
+        follow: number
       },
     )
 
@@ -199,7 +199,7 @@ export default function ExpandableChart() {
         view: number
         like: number
         comment: number
-        social: number
+        follow: number
         share: number
         subscribe: number
         mic_armies: number
@@ -212,7 +212,7 @@ export default function ExpandableChart() {
         like,
         comment,
         share,
-        social,
+        follow,
         subscribe,
         mic_armies,
       }) => ({
@@ -221,7 +221,7 @@ export default function ExpandableChart() {
         view,
         like,
         comment,
-        social,
+        follow,
         share,
         subscribe,
         mic_armies,
@@ -250,7 +250,7 @@ export default function ExpandableChart() {
     view: number
     like: number
     comment: number
-    social: number
+    follow: number
     share: number
     subscribe: number
     mic_armies: number
@@ -277,7 +277,7 @@ export default function ExpandableChart() {
       comment: countTotal('comment'),
       gift: countTotal('gift'),
       share: countTotal('share'),
-      social: countTotal('social'),
+      follow: countTotal('follow'),
     }
   }, [transformedDataArray])
   useEffect(() => {
@@ -386,7 +386,7 @@ export default function ExpandableChart() {
                             />
                           </linearGradient>
                           <linearGradient
-                            id='fillSocial'
+                            id='fillFollow'
                             x1='0'
                             y1='0'
                             x2='0'
@@ -394,12 +394,12 @@ export default function ExpandableChart() {
                           >
                             <stop
                               offset='5%'
-                              stopColor='var(--color-social)'
+                              stopColor='var(--color-follow)'
                               stopOpacity={0.8}
                             />
                             <stop
                               offset='95%'
-                              stopColor='var(--color-social)'
+                              stopColor='var(--color-follow)'
                               stopOpacity={0.1}
                             />
                           </linearGradient>
@@ -520,13 +520,13 @@ export default function ExpandableChart() {
                             stackId='a'
                           />
                         )}
-                        {((isExpanded && activeChart.includes('social')) ||
+                        {((isExpanded && activeChart.includes('follow')) ||
                           activeChart == undefined) && (
                           <Area
-                            dataKey='social'
+                            dataKey='follow'
                             type='natural'
-                            fill='url(#fillSocial)'
-                            stroke='var(--color-social  )'
+                            fill='url(#fillFollow)'
+                            stroke='var(--color-follow  )'
                             stackId='a'
                           />
                         )}
@@ -548,7 +548,7 @@ export default function ExpandableChart() {
               isExpanded ? `border-t` : `border-t-0`
             }`}
           >
-            {['view', 'like', 'comment', 'gift', 'share', 'social'].map(
+            {['view', 'like', 'comment', 'gift', 'share', 'follow'].map(
               (key, i) => {
                 const chart = key as keyof typeof chartConfig
                 return (

@@ -16,6 +16,7 @@ import { cleanLogs } from '@/store/logsSlice'
 
 let socket: Socket | null = null
 let previousUsername = ''
+let currentViewers = 0
 const websocketMiddleware: Middleware<{}, any> = store => {
   const batcher = createBatcher(store.dispatch)
   const viewUserIds = new Set<string>()
@@ -24,7 +25,6 @@ const websocketMiddleware: Middleware<{}, any> = store => {
     const { dispatch } = store
     const username = state.setting.username
     const wsUrl = state.connection.wsUrl
-    const { viewers: currentViewers } = state.liveInfo
     const isRejoin = (userId: string): boolean => {
       return viewUserIds.has(userId)
     }
@@ -132,6 +132,7 @@ const websocketMiddleware: Middleware<{}, any> = store => {
           try {
             data = JSON.parse(data)
             dispatch(setViewers(data.viewerCount))
+            currentViewers = data.viewerCount
           } catch (err) {
             console.error('data-roomInfo', data, err)
           }
@@ -189,13 +190,26 @@ const websocketMiddleware: Middleware<{}, any> = store => {
             console.error('data-share', err)
           }
         })
+        /**
+         * ! Deprecated:
+         * data-social = data-follow / data-share
         socket.on('data-social', data => {
           try {
             data = JSON.parse(data)
-            const type = ActivityType.SOCIAL
+            const type = ActivityType.SHARE
+            // beforeAddLog({ ...data, log_type: type, currentViewers }, batcher)
+          } catch (err) {
+            console.error('data-share', err)
+          }
+        }) 
+          */
+        socket.on('data-follow', data => {
+          try {
+            data = JSON.parse(data)
+            const type = ActivityType.FOLLOW
             beforeAddLog({ ...data, log_type: type, currentViewers }, batcher)
           } catch (err) {
-            console.error('data-social', err)
+            console.error('data-follow', err)
           }
         })
         socket.on('data-member', data => {

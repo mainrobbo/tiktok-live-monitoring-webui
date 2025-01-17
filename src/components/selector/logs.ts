@@ -11,7 +11,7 @@ const getLimited = (log: LogEntry[], limit = DEFAULT_LIMIT) =>
 export const comments = ({ logs }: RootState) => logs[ActivityType.COMMENT]
 export const views = ({ logs }: RootState) => logs[ActivityType.VIEW]
 export const share = ({ logs }: RootState) => logs[ActivityType.SHARE]
-export const social = ({ logs }: RootState) => logs[ActivityType.SOCIAL]
+export const follow = ({ logs }: RootState) => logs[ActivityType.FOLLOW]
 export const gift = ({ logs }: RootState) => logs[ActivityType.GIFT]
 export const subscribe = ({ logs }: RootState) => logs[ActivityType.SUBSCRIBE]
 export const logs = ({ logs }: RootState) => logs
@@ -40,11 +40,11 @@ export const getLimitedShare = createSelector(
   (state: RootState, limit = DEFAULT_LIMIT) =>
     getLimited(Array.from(state.logs[ActivityType.SHARE].values()), limit),
 )
-export const getLimitedSocial = createSelector(
+export const getLimitedFollow = createSelector(
   (state: RootState) => state,
   (state: RootState, limit = DEFAULT_LIMIT) => limit,
   (state: RootState, limit = DEFAULT_LIMIT) =>
-    getLimited(Array.from(state.logs[ActivityType.SOCIAL].values()), limit),
+    getLimited(Array.from(state.logs[ActivityType.FOLLOW].values()), limit),
 )
 export const getLimitedGift = createSelector(
   (state: RootState) => state,
@@ -57,10 +57,10 @@ export const getLimitedSubscribe = createSelector([subscribe], subscribe =>
 )
 
 export const getAllLogs = createSelector(
-  [gift, social, comments, likes, views, share, subscribe],
-  (gift, social, comments, likes, views, share, subscribe) => [
+  [gift, follow, comments, likes, views, share, subscribe],
+  (gift, follow, comments, likes, views, share, subscribe) => [
     ...Array.from(gift.values()),
-    ...Array.from(social.values()),
+    ...Array.from(follow.values()),
     ...Array.from(comments.values()),
     ...Array.from(likes.values()),
     ...Array.from(views.values()),
@@ -69,12 +69,12 @@ export const getAllLogs = createSelector(
   ],
 )
 export const isLogsExist = createSelector(
-  [gift, social, comments, likes, views, share, subscribe],
-  (gift, social, comments, likes, views, share, subscribe) => {
+  [gift, follow, comments, likes, views, share, subscribe],
+  (gift, follow, comments, likes, views, share, subscribe) => {
     return (
       [
         ...Array.from(gift.values()),
-        ...Array.from(social.values()),
+        ...Array.from(follow.values()),
         ...Array.from(comments.values()),
         ...Array.from(likes.values()),
         ...Array.from(views.values()),
@@ -224,8 +224,8 @@ export type Most10ActivityOutputType = {
   gift: string
 }
 export const get10MostActivity = createSelector(
-  [comments, likes, views, share, subscribe, social, gift],
-  (comments, likes, views, share, subscribe, social, gift) => {
+  [comments, likes, views, share, subscribe, follow, gift],
+  (comments, likes, views, share, subscribe, follow, gift) => {
     return Object.values(
       [
         ...Array.from(comments.values()),
@@ -233,7 +233,7 @@ export const get10MostActivity = createSelector(
         ...Array.from(views.values()),
         ...Array.from(share.values()),
         ...Array.from(subscribe.values()),
-        ...Array.from(social.values()),
+        ...Array.from(follow.values()),
         ...Array.from(gift.values()),
       ].reduce(
         (acc, { data }) => {
@@ -248,7 +248,7 @@ export const get10MostActivity = createSelector(
               gift: 0,
               view: 0,
               subscribe: 0,
-              social: 0,
+              follow: 0,
             }
           }
           if (log_type == ActivityType.LIKE) acc[uniqueId].like++
@@ -257,7 +257,7 @@ export const get10MostActivity = createSelector(
           if (log_type == ActivityType.GIFT) acc[uniqueId].gift++
           if (log_type == ActivityType.SUBSCRIBE) acc[uniqueId].subscribe++
           if (log_type == ActivityType.VIEW) acc[uniqueId].view++
-          if (log_type == ActivityType.SOCIAL) acc[uniqueId].social++
+          if (log_type == ActivityType.FOLLOW) acc[uniqueId].follow++
           acc[uniqueId].total++
           return acc
         },
@@ -271,7 +271,7 @@ export const get10MostActivity = createSelector(
             gift: number
             subscribe: number
             view: number
-            social: number
+            follow: number
           }
         },
       ),

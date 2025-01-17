@@ -12,7 +12,7 @@ import { LogEntry } from '@/store/logsSlice'
 import { AnimatePresence, motion } from 'framer-motion'
 import { RootState } from '@/store'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
-export default function SocialList({ defaultOpen = true }) {
+export default function FollowList({ defaultOpen = true }) {
   const [list, setList] = useState<LogEntry[]>([])
   const logs = useSelector((state: RootState) => getLimitedShare(state))
   const chatsRef = useRef<LogEntry[]>(logs)
