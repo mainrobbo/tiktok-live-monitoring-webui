@@ -35,7 +35,6 @@ const logsSlice = createSlice({
           if (logType in state) {
             state[logType].set(entry.data.msgId, entry)
 
-            // Remove oldest entries
             if (state[logType].size > MAX_LOGS_PER_TYPE) {
               const entries = Array.from(state[logType].entries())
               const sortedEntries = entries.sort(

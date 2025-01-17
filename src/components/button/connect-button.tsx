@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { SocketActionType } from '@/lib/types/common'
 import { RootState } from '@/store'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { isLogsExist } from '../selector/logs'
 import { RefreshCwIcon } from 'lucide-react'
@@ -25,30 +25,6 @@ export default function ConnectButton() {
   const { live, wsUrl, state } = useSelector(
     ({ connection }: { connection: RootState['connection'] }) => connection,
   )
-  const [showTransition, setShowTransition] = useState(false)
-  const prevState = useRef(state)
-  useEffect(() => {
-    if (state === 'connecting') {
-      // Reset transition state when connecting starts
-      setShowTransition(false)
-    } else if (
-      prevState.current === 'connecting' &&
-      state.toString() !== 'connecting'
-    ) {
-      // State has switched from 'connecting' to something else
-      setShowTransition(true)
-
-      // After a brief period, reset back to the 'Start' button
-      const timer = setTimeout(() => {
-        setShowTransition(false)
-      }, 2000) // Duration before reverting to "Start" button
-
-      return () => clearTimeout(timer) // Cleanup timeout
-    }
-
-    // Update previous state reference
-    prevState.current = state
-  }, [state])
   const logs = useSelector(isLogsExist)
   const dispatch = useDispatch()
   const handleConnectButton = () => {

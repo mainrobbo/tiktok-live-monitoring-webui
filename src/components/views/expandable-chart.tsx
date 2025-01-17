@@ -69,7 +69,7 @@ export default function ExpandableChart() {
   const logs = useSelector(getAllLogs)
   const [processedLogs, setProcessedLogs] = useState<LogEntry[]>([])
   const logEntriesRef = useRef<LogEntry[]>([])
-  const lastProcessedIndexRef = useRef(0) // Track last processed index
+  const lastProcessedIndexRef = useRef(0)
   const processingRef = useRef(false)
   const debounceLogs = useCallback(
     debounce(
@@ -106,9 +106,9 @@ export default function ExpandableChart() {
     } else {
       logEntriesRef.current = []
       lastProcessedIndexRef.current = 0
-      debounceLogs.cancel() // Cancel any ongoing debounced process
-      setProcessedLogs([]) // Clear the UI logs
-      processingRef.current = false // Reset processing state
+      debounceLogs.cancel()
+      setProcessedLogs([])
+      processingRef.current = false
     }
   }, [logs, processLogsInBatch])
   useEffect(() => {
