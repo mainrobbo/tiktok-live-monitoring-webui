@@ -3,7 +3,7 @@ import { ActivityType } from '@/lib/types/common'
 import { RootState } from '@/store'
 import { LogEntry } from '@/store/logsSlice'
 import { createSelector } from '@reduxjs/toolkit'
-const DEFAULT_LIMIT = 50
+const DEFAULT_LIMIT = 20
 const getLimited = (log: LogEntry[], limit = DEFAULT_LIMIT) =>
   log
     .sort((a, b) => parseInt(b.data.createTime) - parseInt(a.data.createTime))
