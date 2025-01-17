@@ -62,10 +62,8 @@ export default function ShowListGift({
   setDialogOpenState?: (arg0: boolean) => void
   TriggerElement?: ReactNode
 }) {
-  const [open, setOpen] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(dialogOpenState)
   const [showUsername, setShowUsername] = useState(false)
-  const [selectedUsername, setSelectedUsername] = useState(username)
 
   const columnVisibility = {
     user: username == '',
@@ -74,9 +72,9 @@ export default function ShowListGift({
   const mostWords = useSelector((state: RootState) =>
     getGiftByGiftName(state, giftName),
   )
-  const filteredData = useMemo(() => {
-    return mostWords.filter(d => d.user.uniqueId.includes(selectedUsername))
-  }, [selectedUsername])
+  // const filteredData = useMemo(() => {
+  //   return mostWords.filter(d => d.user.uniqueId.includes(selectedUsername))
+  // }, [selectedUsername])
 
   const columns: ColumnDef<OutputType>[] = useMemo(
     () => [
@@ -122,10 +120,10 @@ export default function ShowListGift({
         mostWords.map(u => u.user),
         'userId',
       ),
-    [filteredData],
+    [mostWords],
   )
   const table = useReactTable({
-    data: filteredData,
+    data: mostWords,
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: {
@@ -163,8 +161,7 @@ export default function ShowListGift({
               <>
                 <span className='font-bold'>{giftName}</span>
               </>
-            )}{' '}
-            {selectedUsername && <>from @{selectedUsername}</>}
+            )}
           </DialogDescription>
         </DialogHeader>
         {username == '' && (
@@ -177,66 +174,6 @@ export default function ShowListGift({
             />
             <Label>Show username</Label>
           </div>
-        )}
-
-        {username == '' && (
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant='outline'
-                role='combobox'
-                aria-expanded={open}
-                className='w-full justify-between'
-              >
-                {selectedUsername
-                  ? listUserArray.find(
-                      user => user.uniqueId === selectedUsername,
-                    )?.uniqueId
-                  : 'Select user...'}
-                <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className='w-[400px] p-0'>
-              <Command>
-                <CommandInput placeholder='Search by username...' />
-                <CommandList>
-                  <CommandEmpty>No user found.</CommandEmpty>
-                  <CommandGroup>
-                    {listUserArray.map(user => (
-                      <CommandItem
-                        key={user.uniqueId}
-                        value={user.uniqueId}
-                        onSelect={currentValue => {
-                          setSelectedUsername(
-                            currentValue === selectedUsername
-                              ? ''
-                              : currentValue,
-                          )
-                          setOpen(false)
-                        }}
-                        className='flex justify-between'
-                      >
-                        <div className='flex items-center gap-3'>
-                          <Check
-                            className={cn(
-                              'mr-2 h-4 w-4',
-                              selectedUsername === user.uniqueId
-                                ? 'opacity-100'
-                                : 'opacity-0',
-                            )}
-                          />
-                          {user.nickname}
-                        </div>{' '}
-                        <span className='text-sm text-muted-foreground'>
-                          @{user.uniqueId}
-                        </span>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
         )}
         <DataTable table={table} />
       </DialogContent>

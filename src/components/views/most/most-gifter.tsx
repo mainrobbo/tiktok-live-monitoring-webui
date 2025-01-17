@@ -42,14 +42,12 @@ export default function MostGifter({
           const val = getValue() as number
           return (
             <div className='flex items-center gap-2'>
-              <div>
-                {val}
-                {row.original?.totalStreak > 0 && (
-                  <div className='text-muted-foreground'>
-                    (🔥 {row.original.totalStreak})
-                  </div>
-                )}
-              </div>
+              {val}
+              {row.original?.totalStreak > 0 && (
+                <div className='text-muted-foreground'>
+                  (🔥 {row.original.totalStreak})
+                </div>
+              )}
             </div>
           )
         },
