@@ -1,17 +1,17 @@
-'use client'
+"use client";
 
-import NumberFlow from '@number-flow/react'
-import { type Format } from '@number-flow/react'
+import NumberFlow from "@number-flow/react";
+import { type Format } from "@number-flow/react";
 
 interface NumberFlowProps {
-  value: number
-  format?: Format
-  locales?: string | string[]
-  prefix?: string
-  suffix?: string
-  spinTiming?: EffectTiming
-  willChange?: boolean
-  continuous?: boolean
+  value: number;
+  format?: Format;
+  locales?: string | string[];
+  prefix?: string;
+  suffix?: string;
+  spinTiming?: EffectTiming;
+  willChange?: boolean;
+  continuous?: boolean;
 }
 
 export default function NumberFlowWrapper({
@@ -22,7 +22,6 @@ export default function NumberFlowWrapper({
   suffix,
   spinTiming,
   willChange = false,
-  continuous = false,
 }: NumberFlowProps) {
   return (
     <NumberFlow
@@ -34,5 +33,5 @@ export default function NumberFlowWrapper({
       spinTiming={spinTiming}
       willChange={willChange}
     />
-  )
+  );
 }

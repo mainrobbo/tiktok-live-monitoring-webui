@@ -37,7 +37,7 @@ export default function ConnectButton() {
   const connectButton = () => {
     dispatch({
       type: SocketActionType.START,
-      payload: { url: wsUrl, username },
+      payload: { wsUrl, username },
     })
   }
   return (

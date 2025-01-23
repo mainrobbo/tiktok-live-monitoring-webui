@@ -5,6 +5,7 @@ import settingReducer from './settingSlice'
 import connectionReducer from './connectionSlice'
 import preferencesReducer from './preferencesSlice'
 import liveInfoReducer from './liveInfoSlice'
+import streamToolsReducer from './streamToolsSlice'
 import { enableMapSet } from 'immer'
 
 enableMapSet()
@@ -15,6 +16,7 @@ export const store = configureStore({
     connection: connectionReducer,
     preferences: preferencesReducer,
     liveInfo: liveInfoReducer,
+    streamTools: streamToolsReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
