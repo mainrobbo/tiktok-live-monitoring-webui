@@ -27,6 +27,8 @@ export function AppSettingPopover() {
     const savedWsUrl = get('wsUrl')
     if (savedWsUrl) {
       dispatch(setWSUrl(savedWsUrl))
+    } else {
+      dispatch(setWSUrl('wss://server-tt.zeranel.dev'))
     }
     const savedProxyUrl = get('proxyUrl')
     if (savedProxyUrl) {
