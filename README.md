@@ -1,9 +1,9 @@
-# Adv-TTL-Client
+# Tiktok Live Monitoring (WebUI)
 
-This is the client-side application for **Adv-TTL**, a real-time TikTok Live
-stream monitoring tool. Built with **Next.js**, it provides a user-friendly
-interface to monitor and analyze live stream activities such as chats, gifts,
-viewers, subscribers, and more.
+This is the client-side application for **Tiktok Live Monitoring**, a real-time
+TikTok Live stream monitoring tool. Built with **Next.js**, it provides a
+user-friendly interface to monitor and analyze live stream activities such as
+chats, gifts, viewers, subscribers, and more.
 
 ## Features
 
@@ -56,7 +56,7 @@ viewers, subscribers, and more.
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/farizrifqi/adv-ttl-client.git
+   git clone https://github.com/farizrifqi/tiktok-live-monitoring-webui.git
    cd adv-ttl-client
    ```
 
@@ -115,9 +115,9 @@ This project is open-source and available under the
 
 - **[TikTok-Live-Connector](https://github.com/zerodytrash/TikTok-Live-Connector/)**:
   For providing the core functionality to connect to TikTok Live streams.
-- **[Adv-TTL-Server](https://github.com/farizrifqi/adv-ttl-server)**: The
-  server-side component that powers this client (built-in proxy stream).
-- **[Adv-TTL-Proxy-Worker](https://github.com/farizrifqi/adv-ttl-proxy-worker)**:
+- **[TikTok Live Monitoring (Server)](https://github.com/farizrifqi/tiktok-live-monitoring-server)**:
+  The server-side component that powers this client (built-in proxy stream).
+- **[Tiktok Live Proxy](https://github.com/farizrifqi/tiktok-live-proxy)**:
   Providing proxy stream only.
 
 ## Support
