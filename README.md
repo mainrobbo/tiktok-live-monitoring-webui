@@ -5,6 +5,10 @@ TikTok Live stream monitoring tool. Built with **Next.js**, it provides a
 user-friendly interface to monitor and analyze live stream activities such as
 chats, gifts, viewers, subscribers, and more.
 
+### Preview
+
+![Tiktok Live Monitoring](https://i.imgur.com/2LYwEv7.png)
+
 ## Features
 
 ### Real-Time Monitoring
